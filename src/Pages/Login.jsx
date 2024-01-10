@@ -41,7 +41,7 @@ const Login = () => {
     <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
       <div className="p-4 rounded w-400 h-400 border loginForm">
         <div className="text-warning">{error && error}</div>
-        <h3>Login Chamara</h3>
+        <h3>Login</h3>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="email" className="position-relative w-100 ">
