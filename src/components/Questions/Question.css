@@ -163,6 +163,7 @@
     color: #202124;
 }
 
+
 .text_input:focus{
     border-bottom: 1px solid rgb(103,58,183);
 }

@@ -1,9 +1,11 @@
 import axios from "axios";
 import { MDBTable, MDBTableBody, MDBTableHead } from "mdb-react-ui-kit";
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 function Question() {
   const [allQuestions, setAllQuestions] = useState([]);
+  const getParam = useParams();
 
   useEffect(() => {
     axios
@@ -101,7 +103,7 @@ function Question() {
 
         <MDBTableBody>
           {Array.isArray(allQuestions) && allQuestions.length > 0 ? (
-            allQuestions.map((question, index) => (
+            allQuestions.filter((question)=> question.category_id == getParam.id).map((question, index) => (
               <tr key={index}>
                 <td>
                   <p
@@ -137,7 +139,7 @@ function Question() {
                   </button>
                   <button
                     onClick={() => handleDelete(question.id)}
-                    className="btn btn-danger rounded-pill"
+                    className="btn btn-danger rounded-pill bg-danger "
                   >
                     Delete
                   </button>

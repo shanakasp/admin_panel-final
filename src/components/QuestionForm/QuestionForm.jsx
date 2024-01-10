@@ -14,7 +14,8 @@ import {
   Switch,
   TextField,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState } from "react" 
+import { useParams } from "react-router-dom";
 
 function QuestionForm() {
   const [questions, setQuestions] = useState([
@@ -29,6 +30,8 @@ function QuestionForm() {
       required: false,
     },
   ]);
+
+  const param = useParams();
 
   const [documentName, setDocumentName] = useState("Add Questions");
   const [documentDesc, setDocumentDesc] = useState("Form Description");
@@ -95,7 +98,7 @@ function QuestionForm() {
     }
 
     const saveQuestionsData = {
-      categoryId: 3,
+      categoryId: param.id,
       title: questions[0].questionText, // Set title to the first question's text
       type: "dropdown", // Default type for dropdown questions
       values: [], // Default empty array for dropdown values
