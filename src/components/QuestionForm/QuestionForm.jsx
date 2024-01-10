@@ -1,0 +1,267 @@
+import {
+  AddCircleOutline as AddCircleOutlineIcon,
+  Close as CloseIcon,
+  DeleteOutline as DeleteOutlineIcon,
+} from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionDetails,
+  Button,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Select,
+  Switch,
+  TextField,
+} from "@mui/material";
+import React, { useState } from "react";
+
+function QuestionForm() {
+  const [questions, setQuestions] = useState([
+    {
+      questionText: "",
+      questionType: "dropdown",
+      options: [{ optionText: "" }, { optionText: "" }, { optionText: "" }],
+      answer: false,
+      answerKey: "",
+      point: 0,
+      open: true,
+      required: false,
+    },
+  ]);
+
+  const [documentName, setDocumentName] = useState("Add Questions");
+  const [documentDesc, setDocumentDesc] = useState("Form Description");
+
+  const changeQuestion = (text, i) => {
+    const newQuestions = [...questions];
+    newQuestions[i].questionText = text;
+    setQuestions(newQuestions);
+  };
+
+  const changeOptionValue = (text, i, j) => {
+    const newQuestions = [...questions];
+    newQuestions[i].options[j].optionText = text;
+    setQuestions(newQuestions);
+  };
+
+  const removeOption = (i, j) => {
+    const removeOptionQuestions = [...questions];
+    if (removeOptionQuestions[i].options.length > 1) {
+      removeOptionQuestions[i].options.splice(j, 1);
+      setQuestions(removeOptionQuestions);
+    }
+  };
+
+  const addOption = (i) => {
+    const addnewQuestions = [...questions];
+    if (addnewQuestions[i].options.length < 5) {
+      addnewQuestions[i].options.push({
+        optionText: "",
+      });
+      setQuestions(addnewQuestions);
+    }
+  };
+
+  const addMoreQuestionField = () => {
+    const addMoreQuestions = [...questions];
+    addMoreQuestions.push({
+      questionText: "",
+      questionType: "dropdown",
+      options: [{ optionText: "a" }],
+      open: true,
+      required: false,
+    });
+    setQuestions(addMoreQuestions);
+  };
+
+  const deleteQuestion = (i) => {
+    const updatedQuestions = questions.map((question, index) =>
+      index === i ? { ...question, options: [] } : question
+    );
+    setQuestions(updatedQuestions);
+  };
+  const requiredQuestion = (i) => {
+    const requiredQuestions = [...questions];
+    requiredQuestions[i].required = !requiredQuestions[i].required;
+    setQuestions(requiredQuestions);
+  };
+
+  const saveQuestions = () => {
+    // Assuming there's at least one question
+    if (questions.length === 0) {
+      console.error("No questions to save.");
+      return;
+    }
+
+    const saveQuestionsData = {
+      categoryId: 3,
+      title: questions[0].questionText, // Set title to the first question's text
+      type: "dropdown", // Default type for dropdown questions
+      values: [], // Default empty array for dropdown values
+    };
+
+    const textQuestions = questions.filter(
+      (ques) => ques.questionType === "text"
+    );
+
+    if (textQuestions.length > 0) {
+      // Handle "Text" type questions
+      saveQuestionsData.type = "text";
+      saveQuestionsData.values = textQuestions.map((ques) => ({
+        value: ques.answerText,
+      }));
+    } else {
+      // Handle "Dropdown" type questions
+      if (questions[0].options && questions[0].options.length > 0) {
+        saveQuestionsData.values = questions[0].options.map((option) => ({
+          value: option.optionText,
+        }));
+      } else {
+        // Handle the case where there are no options
+        console.error("Dropdown question should have options.");
+        return; // Do not proceed with the request
+      }
+    }
+
+    // Ensure that title and type are present
+    if (!saveQuestionsData.title || !saveQuestionsData.type) {
+      console.error("Title and type are required.");
+      return; // Do not proceed with the request
+    }
+
+    // Continue with the fetch request
+    fetch(
+      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/addQuestion",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(saveQuestionsData),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Questions saved successfully:", data);
+        // Handle any additional logic or update the state as needed
+      })
+      .catch((error) => {
+        console.error("Error saving questions:", error);
+        // Handle errors or display an error message to the user
+      });
+  };
+
+  const changeQuestionType = (type, i) => {
+    const newQuestions = [...questions];
+    newQuestions[i].questionType = type;
+    setQuestions(newQuestions);
+  };
+
+  const changeAnswerText = (text, i) => {
+    const newQuestions = [...questions];
+    newQuestions[i].answerText = text;
+    setQuestions(newQuestions);
+  };
+
+  const questionUI = () => {
+    return questions.map((ques, i) => (
+      <Accordion key={i} expanded={ques.open}>
+        <AccordionDetails>
+          <div className="mb-2" style={{ width: "300px" }}>
+            <TextField
+              label="Question"
+              variant="outlined"
+              value={ques.questionText}
+              onChange={(e) => changeQuestion(e.target.value, i)}
+              style={{ width: "600px" }}
+            />
+          </div>
+          <div>
+            <Select
+              label="Question Type"
+              value={ques.questionType}
+              onChange={(e) => changeQuestionType(e.target.value, i)}
+              style={{ marginLeft: "300px" }}
+            >
+              <MenuItem value="dropdown">Dropdown</MenuItem>
+              <MenuItem value="text">Text</MenuItem>
+            </Select>
+          </div>
+          {ques.questionType === "dropdown" &&
+            ques.options.map((op, j) => (
+              <div className="mb-2" key={j}>
+                <TextField
+                  label={`Option ${j + 1}`}
+                  variant="outlined"
+                  value={op.optionText}
+                  onChange={(e) => changeOptionValue(e.target.value, i, j)}
+                />
+                <IconButton onClick={() => removeOption(i, j)}>
+                  <CloseIcon />
+                </IconButton>
+              </div>
+            ))}
+          {ques.questionType === "text" && (
+            <div>
+              <TextField
+                label="Answer as Text"
+                variant="outlined"
+                value={ques.answerText || ""}
+                onChange={(e) => changeAnswerText(e.target.value, i)}
+              />
+            </div>
+          )}
+          <IconButton onClick={() => addOption(i)}>
+            <AddCircleOutlineIcon />
+          </IconButton>
+        </AccordionDetails>
+        <div className="m-lg-2">
+          {/*<Button
+            onClick={() => addMoreQuestionField(i)}
+            variant="contained"
+            color="primary"
+          >
+            Add Question
+          </Button>*/}
+          <IconButton onClick={() => deleteQuestion(i)}>
+            <DeleteOutlineIcon />
+          </IconButton>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={ques.required}
+                onChange={() => requiredQuestion(i)}
+                name="required"
+                color="primary"
+              />
+            }
+            label="Required"
+          />
+        </div>
+      </Accordion>
+    ));
+  };
+
+  return (
+    <div className="container mt-4">
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <h3>Add Questions</h3>
+        </div>
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          {questionUI()}
+          <div className="d-grid gap-2">
+            <Button variant="contained" color="primary" onClick={saveQuestions}>
+              Save
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default QuestionForm;
