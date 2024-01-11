@@ -15,8 +15,11 @@ import {
   TextField,
 } from "@mui/material";
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 
 function QuestionForm() {
+  const { id } = useParams();
+  const [categoryId, setCategoryId] = useState(id);
   const [questions, setQuestions] = useState([
     {
       questionText: "",
@@ -95,7 +98,7 @@ function QuestionForm() {
     }
 
     const saveQuestionsData = {
-      categoryId: 3,
+      categoryId: categoryId,
       title: questions[0].questionText, // Set title to the first question's text
       type: "dropdown", // Default type for dropdown questions
       values: [], // Default empty array for dropdown values

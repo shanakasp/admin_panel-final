@@ -46,7 +46,7 @@ function AddCategory() {
         >
           <Typography variant="h4">Add Category</Typography>
           <Box mt={4}>
-            <Typography variant="h5">Enter Category Name</Typography>
+            <Typography variant="h6">Enter Category Name</Typography>
             <TextField
               label="Category Name"
               type="text"
@@ -55,6 +55,7 @@ function AddCategory() {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
+            <Typography variant="h6">Enter Category Name</Typography>
             <TextField
               label="Image Link"
               type="text"
