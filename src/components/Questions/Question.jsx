@@ -48,6 +48,23 @@ function Question() {
         console.error("Error deleting:", error);
       });
   };
+
+  // Modify the rendering logic for the Type column
+  const renderTypeColumn = (question) => {
+    if (
+      question.type === "dropdown" &&
+      Array.isArray(question.values) &&
+      question.values.length > 0
+    ) {
+      const valuesString = question.values
+        .map((value) => value.value)
+        .join(", ");
+      return `${question.type}: ${valuesString}`;
+    } else {
+      return question.type;
+    }
+  };
+
   return (
     <div
       className="QuestionsTable"
@@ -116,7 +133,7 @@ function Question() {
                     className="fw-bold mb-1"
                     style={{ color: "#041083", cursor: "pointer" }}
                   >
-                    {question.type}
+                    {renderTypeColumn(question)}
                   </p>
                 </td>
                 <td>

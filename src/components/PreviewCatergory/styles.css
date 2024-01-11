@@ -1,3 +1,18 @@
+body {
+  margin: 0; /* Remove default body margin */
+}
+
+.categoryContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 cards in a row */
+  justify-content: center;
+  gap: 20px; /* Adjust the gap as needed */
+  margin: 20px auto; /* Centered with 20px top and bottom margin, auto left and right margins */
+  max-width: calc(
+    100% - 400px
+  ); /* Limit the width to leave 200px on both sides */
+}
+
 .card {
   max-width: 300px;
   margin: 10px;

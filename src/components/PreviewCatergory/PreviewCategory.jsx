@@ -26,10 +26,8 @@ function PreviewCategory() {
     <div>
       <Header setSearch={setSearch} />
 
-      <div
-        style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}
-      >
-        {filteredCategories.map((category) => (
+      <div className="categoryContainer">
+        {filteredCategories.map((category, index) => (
           <Link
             key={category.category_id}
             to={`/form/${category.category_id}`}
