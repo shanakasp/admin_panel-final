@@ -55,7 +55,7 @@ function AddCategory() {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
-            <Typography variant="h6">Enter Category Name</Typography>
+            <Typography variant="h6">Enter Category Image Link</Typography>
             <TextField
               label="Image Link"
               type="text"
