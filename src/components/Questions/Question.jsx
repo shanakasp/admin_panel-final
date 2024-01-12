@@ -1,9 +1,11 @@
 import axios from "axios";
 import { MDBTable, MDBTableBody, MDBTableHead } from "mdb-react-ui-kit";
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 function Question() {
   const [allQuestions, setAllQuestions] = useState([]);
+  const getParam = useParams();
 
   useEffect(() => {
     axios
@@ -48,23 +50,6 @@ function Question() {
         console.error("Error deleting:", error);
       });
   };
-
-  // Modify the rendering logic for the Type column
-  const renderTypeColumn = (question) => {
-    if (
-      question.type === "dropdown" &&
-      Array.isArray(question.values) &&
-      question.values.length > 0
-    ) {
-      const valuesString = question.values
-        .map((value) => value.value)
-        .join(", ");
-      return `${question.type}: ${valuesString}`;
-    } else {
-      return question.type;
-    }
-  };
-
   return (
     <div
       className="QuestionsTable"
@@ -105,7 +90,7 @@ function Question() {
               scope="col"
               style={{ color: "blueviolet", width: "30%", fontSize: "20px" }}
             >
-              Category ID
+              Answers
             </th>
             <th
               scope="col"
@@ -118,49 +103,44 @@ function Question() {
 
         <MDBTableBody>
           {Array.isArray(allQuestions) && allQuestions.length > 0 ? (
-            allQuestions.map((question, index) => (
-              <tr key={index}>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {question.title}
-                  </p>
-                </td>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {renderTypeColumn(question)}
-                  </p>
-                </td>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {question.category_id}
-                  </p>
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(question.id)}
-                    className="btn btn-primary rounded-pill"
-                    style={{ marginRight: "10px" }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(question.id)}
-                    className="btn btn-danger rounded-pill"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
+            allQuestions
+              .filter((question) => question.category_id == getParam.id)
+              .map((question, index) => (
+                <tr key={index}>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.title}
+                    </p>
+                  </td>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.type}
+                    </p>
+                  </td>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.values.map((value) => value.value).join(", ")}
+                    </p>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleDelete(question.id)}
+                      className="btn btn-danger rounded-pill bg-danger "
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
           ) : (
             <tr>
               <td colSpan="4">No questions found.</td>

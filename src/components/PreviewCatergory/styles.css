@@ -39,3 +39,14 @@ body {
 .cardHover:hover .categoryName {
   color: #fff;
 }
+
+.buttonsContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.categoryButton {
+  width: 48%;
+  margin-bottom: 10px;
+}

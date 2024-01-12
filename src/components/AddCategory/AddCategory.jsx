@@ -26,6 +26,10 @@ function AddCategory() {
       .then((data) => {
         // Handle the response from the backend as needed
         console.log("Response from server:", data);
+
+        // Reset input fields after successful save
+        setCategoryName("");
+        setImageUrl("");
       })
       .catch((error) => {
         console.error("Error while adding category:", error);

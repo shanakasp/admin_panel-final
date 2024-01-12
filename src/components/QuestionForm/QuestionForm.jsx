@@ -148,6 +148,27 @@ function QuestionForm() {
       .then((data) => {
         console.log("Questions saved successfully:", data);
         // Handle any additional logic or update the state as needed
+
+        // Reset state variables after saving
+        setCategoryId(id);
+        setQuestions([
+          {
+            questionText: "",
+            questionType: "dropdown",
+            options: [
+              { optionText: "" },
+              { optionText: "" },
+              { optionText: "" },
+            ],
+            answer: false,
+            answerKey: "",
+            point: 0,
+            open: true,
+            required: false,
+          },
+        ]);
+        setDocumentName("Add Questions");
+        setDocumentDesc("Form Description");
       })
       .catch((error) => {
         console.error("Error saving questions:", error);
