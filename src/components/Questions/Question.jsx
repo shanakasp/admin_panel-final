@@ -29,7 +29,6 @@ function Question() {
   };
 
   const handleDelete = (questionId) => {
-    // Perform the deletion through an API call
     axios
       .delete(
         `http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/deleteQuestion`,
@@ -40,7 +39,6 @@ function Question() {
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 
-        // Remove the deleted question from the state
         const updatedQuestions = allQuestions.filter(
           (question) => question.id !== questionId
         );

@@ -1,8 +1,11 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header";
 
 function Profile() {
+  const navigate = useNavigate();
+
   const [userName, setUserName] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -36,7 +39,8 @@ function Profile() {
       })
       .then((data) => {
         setMessage("Password changed successfully!");
-        // Handle any additional logic or update the state as needed
+        // Navigate to the home page ("/") after successful password change
+        navigate("/");
       })
       .catch((error) => {
         setMessage(error.message);

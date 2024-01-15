@@ -27,7 +27,6 @@ function PreviewCategory() {
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
 
   useEffect(() => {
-    // Fetch data from your backend API
     fetch(
       "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
     )
@@ -52,7 +51,6 @@ function PreviewCategory() {
   };
 
   const handleEditSave = () => {
-    // Send a request to update the category with the provided data
     fetch(
       `http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/updateCategoryByID/${editCategoryId}`,
       {
@@ -70,10 +68,8 @@ function PreviewCategory() {
       .then((data) => {
         console.log("Category updated successfully:", data);
 
-        // Close the edit dialog
         handleEditDialogClose();
 
-        // Refresh the category list
         fetch(
           "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
         )
@@ -87,7 +83,6 @@ function PreviewCategory() {
   };
 
   const handleDeleteClick = (categoryId) => {
-    // Open a custom styled delete confirmation dialog
     setDeleteCategoryId(categoryId);
     setIsDeleteDialogOpen(true);
   };
@@ -104,7 +99,6 @@ function PreviewCategory() {
       .then((data) => {
         console.log("Category deleted successfully:", data);
 
-        // Refresh the category list after successful deletion
         fetch(
           "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
         )
@@ -116,13 +110,11 @@ function PreviewCategory() {
         console.error("Error deleting category:", error);
       })
       .finally(() => {
-        // Close the delete dialog
         setIsDeleteDialogOpen(false);
       });
   };
 
   const handleCancelDelete = () => {
-    // Close the delete dialog
     setIsDeleteDialogOpen(false);
   };
 
