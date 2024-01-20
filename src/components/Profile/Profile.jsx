@@ -20,16 +20,13 @@ function Profile() {
     };
 
     // Make the API request
-    fetch(
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/admin/changeSuperAdminPassword/1",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    )
+    fetch("http://localhost:8080/admin/changeSuperAdminPassword/1", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
       .then((response) => {
         if (response.ok) {
           return response.json();

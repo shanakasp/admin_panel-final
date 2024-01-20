@@ -1,39 +1,53 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useState } from "react";
+import { v4 } from "uuid";
 import Header from "../Header/Header";
+import { storage } from "./Firebaseconfig";
 
-function AddCategory() {
+const AddCategory = () => {
+  // State variables
   const [categoryName, setCategoryName] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUpload, setImageUpload] = useState(null);
 
-  const handleAddCategory = () => {
-    const apiUrl =
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/placeCategory";
+  // Function to handle adding a category
+  const handleAddCategory = async () => {
+    // Check if an image is selected
+    if (imageUpload === null) return;
 
-    const requestData = {
-      category_name: categoryName,
-      image_url: imageUrl,
-    };
+    // Upload image to Firebase Storage
+    const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
 
-    fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the backend as needed
-        console.log("Response from server:", data);
+    try {
+      const snapshot = await uploadBytes(imageRef, imageUpload);
+      const imageUrl = await getDownloadURL(snapshot.ref);
+      console.log("Image successfully saved to Firebase:", imageUrl);
 
-        // Reset input fields after successful save
-        setCategoryName("");
-        setImageUrl("");
-      })
-      .catch((error) => {
-        console.error("Error while adding category:", error);
+      // Send category data to the server
+      const apiUrl = "http://localhost:8080/category/placeCategory";
+      const requestData = {
+        category_name: categoryName,
+        image_url: imageUrl, // Update to use the obtained URL
+      };
+
+      // Send a POST request to the backend
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
       });
+
+      const data = await response.json();
+      console.log("Response from server:", data);
+
+      // Clear input fields after successful image upload
+      setCategoryName("");
+      setImageUpload(null); // Set to null instead of calling without parameters
+    } catch (error) {
+      console.error("Error handling category:", error);
+    }
   };
 
   return (
@@ -50,6 +64,7 @@ function AddCategory() {
         >
           <Typography variant="h4">Add Category</Typography>
           <Box mt={4}>
+            {/* Category Name Input */}
             <Typography variant="h6">Enter Category Name</Typography>
             <TextField
               label="Category Name"
@@ -59,16 +74,17 @@ function AddCategory() {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
-            <Typography variant="h6">Enter Category Image Link</Typography>
-            <TextField
-              label="Image Link"
-              type="text"
-              fullWidth
-              margin="normal"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+
+            {/* Category Image Input */}
+            <Typography variant="h6">Select Category Image</Typography>
+            <input
+              type="file"
+              onChange={(event) => {
+                setImageUpload(event.target.files[0]);
+              }}
             />
 
+            {/* Add Category Button */}
             <Button
               variant="contained"
               color="primary"
@@ -81,6 +97,6 @@ function AddCategory() {
       </Container>
     </div>
   );
-}
+};
 
 export default AddCategory;

@@ -128,16 +128,13 @@ function QuestionForm() {
       return;
     }
 
-    fetch(
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/addQuestion",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(saveQuestionsData),
-      }
-    )
+    fetch("http://localhost:8080/questions/addQuestion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(saveQuestionsData),
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log("Questions saved successfully:", data);

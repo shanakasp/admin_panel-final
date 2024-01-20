@@ -9,6 +9,7 @@ import FormPreview from "./components/FormPreview/FormPreview";
 // import Template from './components/Template/Template'
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddCategory from "./components/AddCategory/AddCategory";
+import Addimage from "./components/AddCategory/Addimage";
 import PreviewCategory from "./components/PreviewCatergory/PreviewCategory";
 import Profile from "./components/Profile/Profile";
 import PrivateRoutes from "./utils/PrivateRoutes";
@@ -19,6 +20,7 @@ const App = () => {
         <Routes>
           <Route element={<PrivateRoutes />}>
             <Route path="/home" element={<Homepage />} />
+            <Route path="/Addimage" element={<Addimage />} />
             <Route path="/form/:id" element={<Form />} />
             <Route path="/common-question" element={<CommonQuestion />} />
             <Route path="/preview/:id" element={<FormPreview />} />

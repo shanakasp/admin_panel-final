@@ -27,17 +27,18 @@ function PreviewCategory() {
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
 
   useEffect(() => {
-    fetch(
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
-    )
+    fetch("http://localhost:8080/category/getAllCategories")
       .then((response) => response.json())
       .then((data) => setCategories(data.result.data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  const filteredCategories = categories.filter((category) =>
-    category.category_name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Add a check for the categories array before filtering
+  const filteredCategories = Array.isArray(categories)
+    ? categories.filter((category) =>
+        category.category_name.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
   const handleEditClick = (categoryId, categoryName, imageUrl) => {
     setEditCategoryId(categoryId);
@@ -52,7 +53,7 @@ function PreviewCategory() {
 
   const handleEditSave = () => {
     fetch(
-      `http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/updateCategoryByID/${editCategoryId}`,
+      `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
       {
         method: "PUT",
         headers: {
@@ -70,9 +71,7 @@ function PreviewCategory() {
 
         handleEditDialogClose();
 
-        fetch(
-          "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
-        )
+        fetch("http://localhost:8080/category/getAllCategories")
           .then((response) => response.json())
           .then((data) => setCategories(data.result.data))
           .catch((error) => console.error("Error fetching data:", error));
@@ -90,7 +89,7 @@ function PreviewCategory() {
   const handleConfirmDelete = () => {
     // Proceed with the delete logic
     fetch(
-      `http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/deleteCategoryByID/${deleteCategoryId}`,
+      `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
       {
         method: "DELETE",
       }
@@ -99,9 +98,7 @@ function PreviewCategory() {
       .then((data) => {
         console.log("Category deleted successfully:", data);
 
-        fetch(
-          "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/category/getAllCategories"
-        )
+        fetch("http://localhost:8080/category/getAllCategories")
           .then((response) => response.json())
           .then((data) => setCategories(data.result.data))
           .catch((error) => console.error("Error fetching data:", error));
@@ -123,6 +120,7 @@ function PreviewCategory() {
       <Header setSearch={setSearch} />
 
       <div className="categoryContainer">
+        {/* Check if filteredCategories is an array before mapping */}
         {filteredCategories.map((category, index) => (
           <Card key={category.category_id} className={`card cardHover`}>
             <CardContent>
