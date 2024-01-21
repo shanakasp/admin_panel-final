@@ -13,9 +13,9 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { storage } from "../AddCategory/Firebaseconfig";
 import Header from "../Header/Header";
 import "./styles.css";
-
 function PreviewCategory() {
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
@@ -26,6 +26,15 @@ function PreviewCategory() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
+
+  const uploadImageToFirebase = async (selectedFile) => {
+    const storageRef = storage.ref();
+    const imageRef = storageRef.child(`images/${selectedFile.name}`);
+    await imageRef.put(selectedFile);
+    const imageUrl = await imageRef.getDownloadURL();
+    console.log("Image uploaded to Firebase:", imageUrl);
+    return imageUrl;
+  };
 
   useEffect(() => {
     fetch("http://localhost:8080/category/getAllCategories")
@@ -51,34 +60,76 @@ function PreviewCategory() {
     setIsEditDialogOpen(false);
   };
 
-  const handleEditSave = () => {
-    fetch(
-      `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category_name: editCategoryName,
-          image_url: editImageUrl,
-        }),
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Category updated successfully:", data);
+  const handleEditSave = async () => {
+    // Check if a new image is selected
+    if (editImageUrl instanceof File) {
+      try {
+        // Upload image to Firebase
+        const imageUrl = await uploadImageToFirebase(editImageUrl);
 
-        handleEditDialogClose();
-
-        fetch("http://localhost:8080/category/getAllCategories")
+        // Save category name and image URL in the database
+        fetch(
+          `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              category_name: editCategoryName,
+              image_url: imageUrl,
+            }),
+          }
+        )
           .then((response) => response.json())
-          .then((data) => setCategories(data.result.data))
-          .catch((error) => console.error("Error fetching data:", error));
-      })
-      .catch((error) => {
-        console.error("Error updating category:", error);
-      });
+          .then((data) => {
+            console.log("Category updated successfully:", data);
+
+            handleEditDialogClose();
+
+            // Fetch updated data from the server
+            fetch("http://localhost:8080/category/getAllCategories")
+              .then((response) => response.json())
+              .then((data) => setCategories(data.result.data))
+              .catch((error) => console.error("Error fetching data:", error));
+          })
+          .catch((error) => {
+            console.error("Error updating category:", error);
+          });
+      } catch (error) {
+        console.error("Error uploading image to Firebase:", error);
+      }
+    } else {
+      // If no new image is selected, update only the category name
+      fetch(
+        `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            category_name: editCategoryName,
+            image_url: editImageUrl,
+          }),
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Category updated successfully:", data);
+
+          handleEditDialogClose();
+
+          // Fetch updated data from the server
+          fetch("http://localhost:8080/category/getAllCategories")
+            .then((response) => response.json())
+            .then((data) => setCategories(data.result.data))
+            .catch((error) => console.error("Error fetching data:", error));
+        })
+        .catch((error) => {
+          console.error("Error updating category:", error);
+        });
+    }
   };
 
   const handleDeleteClick = (categoryId) => {
