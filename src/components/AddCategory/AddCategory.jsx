@@ -18,6 +18,7 @@ import { storage } from "./Firebaseconfig";
 const AddCategory = () => {
   // State variables
   const [categoryName, setCategoryName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [notification, setNotification] = useState(null);
@@ -65,6 +66,7 @@ const AddCategory = () => {
         category_name: categoryName,
         image_url: imageUrl,
       };
+      console.log(" Request data ", categoryName, imageUrl);
 
       // Send a POST request to the backend
       const response = await fetch(apiUrl, {
@@ -83,7 +85,9 @@ const AddCategory = () => {
         type: "success",
         message: "Saved Successfully",
       });
-
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       // Clear input fields after successful image upload
       setCategoryName("");
       setImageUpload(null);

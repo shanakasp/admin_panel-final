@@ -22,6 +22,7 @@ function PreviewCategory() {
   const [editCategoryId, setEditCategoryId] = useState(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [editImageUrl, setEditImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
@@ -33,7 +34,6 @@ function PreviewCategory() {
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  // Add a check for the categories array before filtering
   const filteredCategories = Array.isArray(categories)
     ? categories.filter((category) =>
         category.category_name.toLowerCase().includes(search.toLowerCase())
@@ -61,7 +61,7 @@ function PreviewCategory() {
         },
         body: JSON.stringify({
           category_name: editCategoryName,
-          image_url: editImageUrl,
+          imageUrl: editImageUrl,
         }),
       }
     )
@@ -87,7 +87,6 @@ function PreviewCategory() {
   };
 
   const handleConfirmDelete = () => {
-    // Proceed with the delete logic
     fetch(
       `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
       {
@@ -115,12 +114,26 @@ function PreviewCategory() {
     setIsDeleteDialogOpen(false);
   };
 
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+
+    if (selectedFile) {
+      setEditImageUrl(URL.createObjectURL(selectedFile));
+
+      // Preview the image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
   return (
     <div>
       <Header setSearch={setSearch} />
 
       <div className="categoryContainer">
-        {/* Check if filteredCategories is an array before mapping */}
         {filteredCategories.map((category, index) => (
           <Card key={category.category_id} className={`card cardHover`}>
             <CardContent>
@@ -145,7 +158,7 @@ function PreviewCategory() {
                       handleEditClick(
                         category.category_id,
                         category.category_name,
-                        category.image_url
+                        category.imageUrl
                       )
                     }
                   >
@@ -170,12 +183,19 @@ function PreviewCategory() {
                 <Button
                   variant="contained"
                   color="primary"
-                  className="categoryName"
+                  style={{
+                    fontSize:
+                      category.category_name.length > 10 ? "14px" : "10px",
+                    lineHeight:
+                      category.category_name.length > 10 ? "1.4" : "1.2",
+                    marginTop: "10px",
+                    transition: "color 0.3s ease-in-out",
+                  }}
                   onMouseOver={(e) =>
-                    (e.target.style.backgroundColor = "#2196f3")
+                    (e.target.style.backgroundColor = "#3f51b5")
                   }
                   onMouseOut={(e) =>
-                    (e.target.style.backgroundColor = "#3f51b5")
+                    (e.target.style.backgroundColor = "#2196f3")
                   }
                 >
                   {category.category_name}
@@ -194,27 +214,42 @@ function PreviewCategory() {
       >
         <DialogTitle id="form-dialog-title">Edit Category</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Edit the details for the selected category.
-          </DialogContentText>
+          {/* Display current name */}
+          <div style={{ marginBottom: "10px" }}>
+            <strong>Current Name:</strong> {editCategoryName}
+          </div>
+
+          {/* Display current image preview */}
+          {imagePreview && (
+            <div style={{ marginBottom: "10px" }}>
+              <strong>Image Preview:</strong>
+
+              <img
+                src={imagePreview}
+                alt="Image Preview"
+                style={{ maxWidth: "100%", maxHeight: "150px", margin: "20px" }}
+              />
+            </div>
+          )}
+
+          {/* Input for new name */}
           <TextField
             autoFocus
             margin="dense"
             id="categoryName"
-            label="Category Name"
+            label="New Category Name"
             type="text"
             fullWidth
             value={editCategoryName}
             onChange={(e) => setEditCategoryName(e.target.value)}
           />
-          <TextField
-            margin="dense"
-            id="imageUrl"
-            label="Image URL"
-            type="text"
-            fullWidth
-            value={editImageUrl}
-            onChange={(e) => setEditImageUrl(e.target.value)}
+
+          {/* Input for new image */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ margin: "10px" }}
           />
         </DialogContent>
         <DialogActions>
