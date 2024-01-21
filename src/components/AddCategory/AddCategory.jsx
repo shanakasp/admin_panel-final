@@ -13,8 +13,8 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useState } from "react";
 import { v4 } from "uuid";
 import Header from "../Header/Header";
+import "./AddCategory.css";
 import { storage } from "./Firebaseconfig";
-
 const AddCategory = () => {
   // State variables
   const [categoryName, setCategoryName] = useState("");
@@ -134,13 +134,16 @@ const AddCategory = () => {
     <ThemeProvider theme={theme}>
       <div>
         <Header />
-        <Container maxWidth="sm">
+        <Container className="containerborder" maxWidth="sm">
           <Box
             sx={{
               marginTop: 8,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              border: "2px solid #2196f3", // Add border styling here
+              color: "primary",
+              padding: 5, // Optionally, add padding for better appearance
             }}
           >
             <Typography variant="h4">Add Category</Typography>
@@ -178,12 +181,16 @@ const AddCategory = () => {
                   }}
                 />
               )}
-
+              <br></br>
               {/* Add Category Button */}
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleAddCategory}
+                style={{
+                  marginBottom: "10px",
+                  marginTop: "20px",
+                }}
               >
                 Add Category
               </Button>

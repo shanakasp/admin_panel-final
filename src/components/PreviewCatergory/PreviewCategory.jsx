@@ -1,5 +1,6 @@
 import { Delete, Edit } from "@mui/icons-material";
 import {
+  Alert,
   Button,
   Card,
   CardContent,
@@ -15,8 +16,10 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { storage } from "../AddCategory/Firebaseconfig";
 import Header from "../Header/Header";
-import "./styles.css";
+import "./previewstyles.css";
+
 function PreviewCategory() {
+  const [notificationTimeout, setNotificationTimeout] = useState(null);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [editCategoryId, setEditCategoryId] = useState(null);
@@ -26,6 +29,7 @@ function PreviewCategory() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const uploadImageToFirebase = async (selectedFile) => {
     const storageRef = storage.ref();
@@ -42,11 +46,23 @@ function PreviewCategory() {
       .then((data) => setCategories(data.result.data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+  const handleEditDialogClose = () => {
+    setIsEditDialogOpen(false);
+    setNotification(null); // Clear any existing notifications
+    clearNotificationTimeout();
+  };
 
+  const clearNotificationTimeout = () => {
+    if (notificationTimeout) {
+      clearTimeout(notificationTimeout);
+    }
+  };
   const filteredCategories = Array.isArray(categories)
-    ? categories.filter((category) =>
-        category.category_name.toLowerCase().includes(search.toLowerCase())
-      )
+    ? categories
+        .filter((category) =>
+          category.category_name.toLowerCase().includes(search.toLowerCase())
+        )
+        .sort((a, b) => a.category_name.localeCompare(b.category_name))
     : [];
 
   const handleEditClick = (categoryId, categoryName, imageUrl) => {
@@ -56,11 +72,35 @@ function PreviewCategory() {
     setIsEditDialogOpen(true);
   };
 
-  const handleEditDialogClose = () => {
-    setIsEditDialogOpen(false);
-  };
-
   const handleEditSave = async () => {
+    const timeoutId = setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+
+    setNotificationTimeout(timeoutId);
+
+    if (editCategoryId && !editCategoryName.trim()) {
+      setNotification({
+        type: "error",
+        message: "Please Enter Category Name",
+      });
+      return;
+    }
+
+    // Check if the new category name already exists
+    const isDuplicateName = categories.some(
+      (category) =>
+        category.category_name.toLowerCase() === editCategoryName.toLowerCase()
+    );
+
+    if (isDuplicateName) {
+      setNotification({
+        type: "error",
+        message: "Entered name already exists.",
+      });
+      return;
+    }
+
     // Check if a new image is selected
     if (editImageUrl instanceof File) {
       try {
@@ -238,9 +278,10 @@ function PreviewCategory() {
                     fontSize:
                       category.category_name.length > 10 ? "14px" : "10px",
                     lineHeight:
-                      category.category_name.length > 10 ? "1.4" : "1.2",
+                      category.category_name.length > 10 ? "1.4" : "1",
                     marginTop: "10px",
                     transition: "color 0.3s ease-in-out",
+                    width: "100%",
                   }}
                   onMouseOver={(e) =>
                     (e.target.style.backgroundColor = "#3f51b5")
@@ -262,13 +303,26 @@ function PreviewCategory() {
         open={isEditDialogOpen}
         onClose={handleEditDialogClose}
         aria-labelledby="form-dialog-title"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center", // Center the content
+        }}
       >
+        {notification && (
+          <Alert
+            severity={notification.type ? notification.type : "info"}
+            onClose={() => {
+              setNotification(null);
+              clearNotificationTimeout();
+            }}
+          >
+            {notification.message}
+          </Alert>
+        )}
         <DialogTitle id="form-dialog-title">Edit Category</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Edit the details for the selected category.
-          </DialogContentText>
-
           {/* Display current name */}
           <div style={{ marginBottom: "10px" }}>
             <strong>Current Name:</strong> {editCategoryName}
@@ -298,13 +352,12 @@ function PreviewCategory() {
             onChange={(e) => setEditCategoryName(e.target.value)}
           />
 
-          {/* Input for new image */}
-          <input
+          {/*   <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
             style={{ marginBottom: "10px" }}
-          />
+          /> */}
 
           {editImageUrl && (
             <div>

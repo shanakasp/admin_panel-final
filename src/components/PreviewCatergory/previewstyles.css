@@ -22,7 +22,7 @@ body {
 
 .categoryImage {
   width: 100%;
-  height: 150px;
+  height: 170px;
   object-fit: cover;
   transition: filter 0.3s ease-in-out;
 }
@@ -54,4 +54,8 @@ body {
 .categoryButton {
   width: 48%;
   margin-bottom: 10px;
+}
+
+#form-dialog-title {
+  width: 550px;
 }
