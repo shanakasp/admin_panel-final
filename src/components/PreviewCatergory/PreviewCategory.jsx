@@ -61,7 +61,7 @@ function PreviewCategory() {
         },
         body: JSON.stringify({
           category_name: editCategoryName,
-          imageUrl: editImageUrl,
+          image_url: editImageUrl,
         }),
       }
     )
@@ -158,7 +158,7 @@ function PreviewCategory() {
                       handleEditClick(
                         category.category_id,
                         category.category_name,
-                        category.imageUrl
+                        category.image_url
                       )
                     }
                   >
@@ -214,6 +214,10 @@ function PreviewCategory() {
       >
         <DialogTitle id="form-dialog-title">Edit Category</DialogTitle>
         <DialogContent>
+          <DialogContentText>
+            Edit the details for the selected category.
+          </DialogContentText>
+
           {/* Display current name */}
           <div style={{ marginBottom: "10px" }}>
             <strong>Current Name:</strong> {editCategoryName}
@@ -222,12 +226,11 @@ function PreviewCategory() {
           {/* Display current image preview */}
           {imagePreview && (
             <div style={{ marginBottom: "10px" }}>
-              <strong>Image Preview:</strong>
-
+              <strong>Image Preview:</strong>{" "}
               <img
                 src={imagePreview}
                 alt="Image Preview"
-                style={{ maxWidth: "100%", maxHeight: "150px", margin: "20px" }}
+                style={{ maxWidth: "100%", maxHeight: "150px" }}
               />
             </div>
           )}
@@ -249,8 +252,19 @@ function PreviewCategory() {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            style={{ margin: "10px" }}
+            style={{ marginBottom: "10px" }}
           />
+
+          {editImageUrl && (
+            <div>
+              <p>Current Image Preview:</p>
+              <img
+                src={editImageUrl}
+                alt="Current Preview"
+                style={{ maxWidth: "100%", maxHeight: "200px" }}
+              />
+            </div>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditDialogClose} color="primary">
