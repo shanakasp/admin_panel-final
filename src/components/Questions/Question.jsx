@@ -9,7 +9,9 @@ function Question() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/questions/getAllQuestions")
+      .get(
+        "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/questions/getAllQuestions"
+      )
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           setAllQuestions(response.data.result.questions);
@@ -28,9 +30,12 @@ function Question() {
 
   const handleDelete = (questionId) => {
     axios
-      .delete(`http://localhost:8080/questions/deleteQuestion`, {
-        data: { questionId: [questionId] },
-      })
+      .delete(
+        `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/questions/deleteQuestion`,
+        {
+          data: { questionId: [questionId] },
+        }
+      )
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 

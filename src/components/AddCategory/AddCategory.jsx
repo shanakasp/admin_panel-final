@@ -15,6 +15,7 @@ import { v4 } from "uuid";
 import Header from "../Header/Header";
 import "./AddCategory.css";
 import { storage } from "./Firebaseconfig";
+
 const AddCategory = () => {
   // State variables
   const [categoryName, setCategoryName] = useState("");
@@ -25,6 +26,9 @@ const AddCategory = () => {
 
   // Function to handle adding a category
   const handleAddCategory = async () => {
+    // Clear previous error messages
+    setNotification(null);
+
     if (!categoryName.trim()) {
       setNotification({
         type: "error",
@@ -33,7 +37,10 @@ const AddCategory = () => {
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-
+      // Reset input fields to null
+      setCategoryName("");
+      setImageUpload(null);
+      setImagePreview(null);
       return;
     }
 
@@ -43,12 +50,10 @@ const AddCategory = () => {
         type: "error",
         message: "Not Saved Successfully: Image is required",
       });
-
-      // Wait for 2 seconds (adjust as needed) before refreshing the page
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-
+      // Reset input fields to null
+      setCategoryName("");
+      setImageUpload(null);
+      setImagePreview(null);
       return;
     }
 
@@ -61,12 +66,12 @@ const AddCategory = () => {
       console.log("Image successfully saved to Firebase:", imageUrl);
 
       // Send category data to the server
-      const apiUrl = "http://localhost:8080/category/placeCategory";
+      const apiUrl =
+        "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/placeCategory";
       const requestData = {
         category_name: categoryName,
         image_url: imageUrl,
       };
-      console.log(" Request data ", categoryName, imageUrl);
 
       // Send a POST request to the backend
       const response = await fetch(apiUrl, {
@@ -99,6 +104,10 @@ const AddCategory = () => {
         type: "error",
         message: "Not Saved Successfully: An error occurred",
       });
+      // Reset input fields to null
+      setCategoryName("");
+      setImageUpload(null);
+      setImagePreview(null);
     }
   };
 

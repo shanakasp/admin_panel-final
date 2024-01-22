@@ -41,11 +41,14 @@ function PreviewCategory() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:8080/category/getAllCategories")
+    fetch(
+      "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
+    )
       .then((response) => response.json())
       .then((data) => setCategories(data.result.data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
   const handleEditDialogClose = () => {
     setIsEditDialogOpen(false);
     setNotification(null); // Clear any existing notifications
@@ -57,10 +60,15 @@ function PreviewCategory() {
       clearTimeout(notificationTimeout);
     }
   };
+
   const filteredCategories = Array.isArray(categories)
     ? categories
-        .filter((category) =>
-          category.category_name.toLowerCase().includes(search.toLowerCase())
+        .filter(
+          (category) =>
+            category.category_name &&
+            category.category_name
+              .toLowerCase()
+              .startsWith(search.toLowerCase())
         )
         .sort((a, b) => a.category_name.localeCompare(b.category_name))
     : [];
@@ -89,8 +97,7 @@ function PreviewCategory() {
 
     // Check if the new category name already exists
     const isDuplicateName = categories.some(
-      (category) =>
-        category.category_name.toLowerCase() === editCategoryName.toLowerCase()
+      (category) => category.category_name === editCategoryName
     );
 
     if (isDuplicateName) {
@@ -109,7 +116,7 @@ function PreviewCategory() {
 
         // Save category name and image URL in the database
         fetch(
-          `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
+          `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/updateCategoryByID/${editCategoryId}`,
           {
             method: "PUT",
             headers: {
@@ -128,7 +135,9 @@ function PreviewCategory() {
             handleEditDialogClose();
 
             // Fetch updated data from the server
-            fetch("http://localhost:8080/category/getAllCategories")
+            fetch(
+              "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
+            )
               .then((response) => response.json())
               .then((data) => setCategories(data.result.data))
               .catch((error) => console.error("Error fetching data:", error));
@@ -142,7 +151,7 @@ function PreviewCategory() {
     } else {
       // If no new image is selected, update only the category name
       fetch(
-        `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
+        `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/updateCategoryByID/${editCategoryId}`,
         {
           method: "PUT",
           headers: {
@@ -161,7 +170,9 @@ function PreviewCategory() {
           handleEditDialogClose();
 
           // Fetch updated data from the server
-          fetch("http://localhost:8080/category/getAllCategories")
+          fetch(
+            "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
+          )
             .then((response) => response.json())
             .then((data) => setCategories(data.result.data))
             .catch((error) => console.error("Error fetching data:", error));
@@ -179,7 +190,7 @@ function PreviewCategory() {
 
   const handleConfirmDelete = () => {
     fetch(
-      `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
+      `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/deleteCategoryByID/${deleteCategoryId}`,
       {
         method: "DELETE",
       }
@@ -188,7 +199,9 @@ function PreviewCategory() {
       .then((data) => {
         console.log("Category deleted successfully:", data);
 
-        fetch("http://localhost:8080/category/getAllCategories")
+        fetch(
+          "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
+        )
           .then((response) => response.json())
           .then((data) => setCategories(data.result.data))
           .catch((error) => console.error("Error fetching data:", error));
@@ -203,21 +216,6 @@ function PreviewCategory() {
 
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
-  };
-
-  const handleImageChange = (e) => {
-    const selectedFile = e.target.files[0];
-
-    if (selectedFile) {
-      setEditImageUrl(URL.createObjectURL(selectedFile));
-
-      // Preview the image
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(selectedFile);
-    }
   };
 
   return (
@@ -276,12 +274,13 @@ function PreviewCategory() {
                   color="primary"
                   style={{
                     fontSize:
-                      category.category_name.length > 10 ? "14px" : "10px",
+                      category.category_name.length > 11 ? "14px" : "18px",
                     lineHeight:
                       category.category_name.length > 10 ? "1.4" : "1",
                     marginTop: "10px",
                     transition: "color 0.3s ease-in-out",
                     width: "100%",
+                    textTransform: "none", // Set to "none" to prevent uppercase transformation
                   }}
                   onMouseOver={(e) =>
                     (e.target.style.backgroundColor = "#3f51b5")
