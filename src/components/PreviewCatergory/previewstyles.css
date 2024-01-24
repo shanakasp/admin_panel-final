@@ -15,8 +15,8 @@ body {
 .card {
   width: 100%;
   max-width: 350px;
-  margin-left: auto;
   gap: 20px;
+  margin: auto; /* Center the container horizontally by default */
   text-align: center;
   align-items: center;
 }
