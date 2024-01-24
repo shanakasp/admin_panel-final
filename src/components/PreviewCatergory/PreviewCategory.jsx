@@ -274,9 +274,9 @@ function PreviewCategory() {
                   color="primary"
                   style={{
                     fontSize:
-                      category.category_name.length > 11 ? "14px" : "18px",
+                      category.category_name.length > 15 ? "14px" : "18px",
                     lineHeight:
-                      category.category_name.length > 10 ? "1.4" : "1",
+                      category.category_name.length > 10 ? "1.4" : "1.2",
                     marginTop: "10px",
                     transition: "color 0.3s ease-in-out",
                     width: "100%",
