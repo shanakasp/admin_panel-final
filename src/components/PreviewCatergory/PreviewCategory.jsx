@@ -303,10 +303,10 @@ function PreviewCategory() {
         onClose={handleEditDialogClose}
         aria-labelledby="form-dialog-title"
         sx={{
-          display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           textAlign: "center", // Center the content
+          width: "440px", // Set a maximum width for the dialog
+          margin: "auto", // Center the dialog horizontally
         }}
       >
         {notification && (
@@ -351,15 +351,9 @@ function PreviewCategory() {
             onChange={(e) => setEditCategoryName(e.target.value)}
           />
 
-          {/*   <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            style={{ marginBottom: "10px" }}
-          /> */}
-
+          {/* Display current image preview */}
           {editImageUrl && (
-            <div>
+            <div style={{ marginBottom: "10px" }}>
               <p>Current Image Preview:</p>
               <img
                 src={editImageUrl}
