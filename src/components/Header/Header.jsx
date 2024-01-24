@@ -1,4 +1,3 @@
-import AppsIcon from "@mui/icons-material/Apps";
 import SearchIcon from "@mui/icons-material/Search";
 import { IconButton } from "@mui/material";
 import React, { useRef } from "react";
@@ -43,11 +42,6 @@ const Header = (props) => {
             />
           </div>
         )}
-        <div className="header_right">
-          <IconButton>
-            <AppsIcon />
-          </IconButton>
-        </div>
       </div>
     </div>
   );

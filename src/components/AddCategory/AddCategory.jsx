@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Container,
-  Snackbar,
   TextField,
   ThemeProvider,
   Typography,
@@ -13,59 +12,39 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useState } from "react";
 import { v4 } from "uuid";
 import Header from "../Header/Header";
-import "./AddCategory.css";
 import { storage } from "./Firebaseconfig";
 
 const AddCategory = () => {
-  // State variables
   const [categoryName, setCategoryName] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [categoryNameError, setCategoryNameError] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  // Function to handle adding a category
   const handleAddCategory = async () => {
-    // Clear previous error messages
     setNotification(null);
+    setCategoryNameError(null);
+    setImageError(null);
+    setSuccessMessage(null);
 
     if (!categoryName.trim()) {
-      setNotification({
-        type: "error",
-        message: "Not Saved Successfully: Category Name is required",
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-      // Reset input fields to null
-      setCategoryName("");
-      setImageUpload(null);
-      setImagePreview(null);
+      setCategoryNameError("Please enter category name.");
       return;
     }
 
-    // Check if an image is selected
     if (imageUpload === null) {
-      setNotification({
-        type: "error",
-        message: "Not Saved Successfully: Image is required",
-      });
-      // Reset input fields to null
-      setCategoryName("");
-      setImageUpload(null);
-      setImagePreview(null);
+      setImageError("Please upload an image for the category.");
       return;
     }
 
-    // Upload image to Firebase Storage
     const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
 
     try {
       const snapshot = await uploadBytes(imageRef, imageUpload);
       const imageUrl = await getDownloadURL(snapshot.ref);
-      console.log("Image successfully saved to Firebase:", imageUrl);
 
-      // Send category data to the server
       const apiUrl =
         "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/placeCategory";
       const requestData = {
@@ -73,7 +52,6 @@ const AddCategory = () => {
         image_url: imageUrl,
       };
 
-      // Send a POST request to the backend
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -83,40 +61,55 @@ const AddCategory = () => {
       });
 
       const data = await response.json();
-      console.log("Response from server:", data);
 
-      // Show success notification
-      setNotification({
-        type: "success",
-        message: "Saved Successfully",
-      });
+      setSuccessMessage("Saved Successfully");
       setTimeout(() => {
+        setSuccessMessage(null);
         window.location.reload();
       }, 1500);
-      // Clear input fields after successful image upload
+
       setCategoryName("");
       setImageUpload(null);
       setImagePreview(null);
     } catch (error) {
       console.error("Error handling category:", error);
-      // Show error notification
+
       setNotification({
         type: "error",
         message: "Not Saved Successfully: An error occurred",
       });
-      // Reset input fields to null
+
       setCategoryName("");
       setImageUpload(null);
       setImagePreview(null);
     }
   };
 
-  // Function to handle image preview
   const handleImagePreview = (event) => {
     const file = event.target.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".tiff",
+      ".eps",
+      ".raw",
+    ];
+    const fileType = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+
+    if (!allowedTypes.includes(fileType)) {
+      setImageError(
+        "Invalid image type. Please select JPEG, PNG, GIF, TIFF, EPS, RAW images."
+      );
+      return;
+    }
+
     setImageUpload(file);
 
-    // Preview the image
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
@@ -124,7 +117,6 @@ const AddCategory = () => {
     reader.readAsDataURL(file);
   };
 
-  // Global theme for notifications
   const theme = createTheme({
     palette: {
       success: {
@@ -143,21 +135,26 @@ const AddCategory = () => {
     <ThemeProvider theme={theme}>
       <div>
         <Header />
+
         <Container className="containerborder" maxWidth="sm">
+          {successMessage && (
+            <Alert severity="success" sx={{ marginTop: 2 }}>
+              {successMessage}
+            </Alert>
+          )}
           <Box
             sx={{
               marginTop: 8,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              border: "2px solid #2196f3", // Add border styling here
+              border: "2px solid #2196f3",
               color: "primary",
-              padding: 5, // Optionally, add padding for better appearance
+              padding: 5,
             }}
           >
             <Typography variant="h4">Add Category</Typography>
             <Box mt={4}>
-              {/* Category Name Input */}
               <Typography variant="h6">Enter Category Name</Typography>
               <TextField
                 label="Category Name"
@@ -167,18 +164,28 @@ const AddCategory = () => {
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
               />
+              {categoryNameError && (
+                <Alert severity="error" sx={{ marginBottom: 2 }}>
+                  {categoryNameError}
+                </Alert>
+              )}
 
-              {/* Category Image Input with Preview */}
               <Typography
                 variant="h6"
-                style={{
-                  marginBottom: "10px",
-                  marginTop: "10px",
-                }}
+                style={{ marginBottom: "10px", marginTop: "10px" }}
               >
                 Select Category Image
               </Typography>
-              <input type="file" onChange={handleImagePreview} />
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png, .gif, .tiff, .eps, .raw"
+                onChange={handleImagePreview}
+              />
+              {imageError && (
+                <Alert severity="error" sx={{ marginTop: 2 }}>
+                  {imageError}
+                </Alert>
+              )}
               {imagePreview && (
                 <img
                   src={imagePreview}
@@ -190,8 +197,8 @@ const AddCategory = () => {
                   }}
                 />
               )}
-              <br></br>
-              {/* Add Category Button */}
+
+              <br />
               <Button
                 variant="contained"
                 color="primary"
@@ -203,27 +210,6 @@ const AddCategory = () => {
               >
                 Add Category
               </Button>
-
-              {/* Snackbar Notification */}
-              <Snackbar
-                open={notification !== null}
-                autoHideDuration={6000}
-                onClose={() => setNotification(null)}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-              >
-                <Alert
-                  severity={
-                    notification && notification.type
-                      ? notification.type
-                      : "info"
-                  }
-                  onClose={() => setNotification(null)}
-                >
-                  {notification && notification.message
-                    ? notification.message
-                    : ""}
-                </Alert>
-              </Snackbar>
             </Box>
           </Box>
         </Container>
