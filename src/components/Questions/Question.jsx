@@ -74,21 +74,21 @@ function Question() {
           <tr style={{ color: "#646a85" }}>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "50%", fontSize: "25px" }}
+              style={{ color: "blueviolet", width: "50%", fontSize: "20px" }}
             >
               Title
             </th>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "35%", fontSize: "20px" }}
+              style={{ color: "blueviolet", width: "45%", fontSize: "20px" }}
             >
               Input Type
             </th>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "30%", fontSize: "20px" }}
+              style={{ color: "blueviolet", width: "36%", fontSize: "20px" }}
             >
-              Answers
+              Ans.
             </th>
             <th
               scope="col"
@@ -132,7 +132,12 @@ function Question() {
                   <td>
                     <button
                       onClick={() => handleDelete(question.id)}
-                      className="btn btn-danger rounded-pill bg-danger "
+                      className="btn btn-danger rounded-pill bg-danger"
+                      style={{
+                        fontSize: "14px",
+                        width: "60px",
+                        padding: "2px",
+                      }}
                     >
                       Delete
                     </button>

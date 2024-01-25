@@ -9,7 +9,6 @@
 .header_info {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
 .header_search {
@@ -18,7 +17,7 @@
   align-items: center;
   border-radius: 24px;
   background-color: #f4f4f9;
-  width: 200px;
+  width: 170px;
   height: 45px;
   border-radius: 5px;
 }

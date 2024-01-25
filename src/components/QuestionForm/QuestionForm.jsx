@@ -189,7 +189,7 @@ function QuestionForm() {
               variant="outlined"
               value={ques.questionText}
               onChange={(e) => changeQuestion(e.target.value, i)}
-              style={{ width: "600px" }}
+              style={{ width: "300px" }}
             />
           </div>
           <div>
@@ -197,7 +197,11 @@ function QuestionForm() {
               label="Question Type"
               value={ques.questionType}
               onChange={(e) => changeQuestionType(e.target.value, i)}
-              style={{ marginLeft: "300px" }}
+              style={{
+                marginLeft: "200px",
+                marginBottom: "20px",
+                marginTop: "10px",
+              }}
             >
               <MenuItem value="dropdown">Dropdown</MenuItem>
               <MenuItem value="text">Text</MenuItem>

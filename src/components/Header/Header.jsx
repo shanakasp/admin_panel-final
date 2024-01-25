@@ -24,7 +24,7 @@ const Header = (props) => {
             src=".././images/medical.png"
             alt=""
             className="header_logo"
-            width={"150px"}
+            width={"120px"}
           />
         </div>
       </div>
