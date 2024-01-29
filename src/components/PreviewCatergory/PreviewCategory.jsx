@@ -12,8 +12,10 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { v4 } from "uuid";
 import { storage } from "../AddCategory/Firebaseconfig";
 import Header from "../Header/Header";
 import "./previewstyles.css";
@@ -30,6 +32,7 @@ function PreviewCategory() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
 
   const MAX_CHARACTERS = 50;
 
@@ -81,74 +84,26 @@ function PreviewCategory() {
   };
 
   const handleEditSave = async () => {
-    const timeoutId = setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-
-    setNotificationTimeout(timeoutId);
-
-    if (editCategoryId && !editCategoryName.trim()) {
-      setNotification({
-        type: "error",
-        message: "Please Enter Category Name",
-      });
-      return;
-    }
-
-    // Check if the new category name already exists
-    const isDuplicateName = categories.some(
-      (category) => category.category_name === editCategoryName
-    );
-
-    if (isDuplicateName) {
-      setNotification({
-        type: "error",
-        message: "Entered name already exists.",
-      });
-      return;
-    }
-
-    // Check if a new image is selected
-    if (editImageUrl instanceof File) {
-      try {
-        // Upload image to Firebase
-        const imageUrl = await uploadImageToFirebase(editImageUrl);
-
-        // Save category name and image URL in the database
-        fetch(
-          `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              category_name: editCategoryName,
-              image_url: imageUrl,
-            }),
-          }
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Category updated successfully:", data);
-
-            handleEditDialogClose();
-
-            // Fetch updated data from the server
-            fetch("http://localhost:8080/category/getAllCategories")
-              .then((response) => response.json())
-              .then((data) => setCategories(data.result.data))
-              .catch((error) => console.error("Error fetching data:", error));
-          })
-          .catch((error) => {
-            console.error("Error updating category:", error);
-          });
-      } catch (error) {
-        console.error("Error uploading image to Firebase:", error);
+    try {
+      // Validate category name
+      if (!editCategoryName.trim()) {
+        console.error("Please enter category name.");
+        return;
       }
-    } else {
-      // If no new image is selected, update only the category name
-      fetch(
+
+      // Validate image
+      if (!selectedImageFile) {
+        console.error("Please upload an image for the category.");
+        return;
+      }
+
+      // Upload the new image to Firebase
+      const imageRef = ref(storage, `images/${selectedImageFile.name + v4()}`);
+      const snapshot = await uploadBytes(imageRef, selectedImageFile);
+      const imageUrl = await getDownloadURL(snapshot.ref);
+
+      // Save category name and image URL in the database
+      await fetch(
         `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
         {
           method: "PUT",
@@ -157,25 +112,23 @@ function PreviewCategory() {
           },
           body: JSON.stringify({
             category_name: editCategoryName,
-            image_url: editImageUrl,
+            image_url: imageUrl,
           }),
         }
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Category updated successfully:", data);
+      );
 
-          handleEditDialogClose();
+      // Fetch updated data from the server
+      const response = await fetch(
+        "http://localhost:8080/category/getAllCategories"
+      );
+      const data = await response.json();
+      setCategories(data.result.data);
 
-          // Fetch updated data from the server
-          fetch("http://localhost:8080/category/getAllCategories")
-            .then((response) => response.json())
-            .then((data) => setCategories(data.result.data))
-            .catch((error) => console.error("Error fetching data:", error));
-        })
-        .catch((error) => {
-          console.error("Error updating category:", error);
-        });
+      handleEditDialogClose();
+    } catch (error) {
+      console.error("Error updating category:", error);
+
+      // Handle error as needed, e.g., set an error notification
     }
   };
 
@@ -210,6 +163,10 @@ function PreviewCategory() {
 
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
+  };
+  const handleImageChange = (e) => {
+    // Update the selected image file when the user selects a new image
+    setSelectedImageFile(e.target.files[0]);
   };
 
   return (
@@ -357,6 +314,15 @@ function PreviewCategory() {
               />
             </div>
           )}
+          <div>
+            Select new image
+            <br />
+            <input
+              type="file"
+              accept=".jpg, .jpeg, .png, .gif, .tiff, .eps, .raw"
+              onChange={handleImageChange} // Handle the file change event
+            />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditDialogClose} color="primary">

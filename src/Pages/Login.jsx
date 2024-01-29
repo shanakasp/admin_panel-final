@@ -25,7 +25,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/admin/login",
+        "http://3.143.231.155:3006/admin/login",
         values
       );
 
