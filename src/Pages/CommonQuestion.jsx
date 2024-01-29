@@ -1,12 +1,12 @@
-import React from 'react'
-import Header from '../components/Header/Header'
+import React from "react";
+import Header from "../components/Header/Header";
 const CommonQuestion = () => {
   return (
     <div>
-      <Header />  
+      <Header />
       CommonQuestion
     </div>
-  )
-}
+  );
+};
 
-export default CommonQuestion
+export default CommonQuestion;

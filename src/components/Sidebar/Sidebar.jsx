@@ -17,6 +17,12 @@ const Sidebar = () => {
   const toggleDrawer = (anchor, open) => (event) => {
     setstate({ ...state, [anchor]: open });
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    window.location.href = "/";
+  };
   const list = () => (
     <div style={{ width: "300px" }} role="presentation">
       <List>
@@ -30,7 +36,7 @@ const Sidebar = () => {
         </ListItem>
 
         <Devider />
-        <NavLink to="/dashboard" className="navlink">
+        <NavLink to="/dd" className="navlink">
           <ListItem className="list_item">
             <SettingsInputComponentSharp />
             <h4>Categories</h4>
@@ -68,7 +74,7 @@ const Sidebar = () => {
             <h4>Profile</h4>
           </ListItem>
         </NavLink>
-        <NavLink to="/" className="navlink">
+        <NavLink to="/" className="navlink" onClick={handleLogout}>
           <ListItem className="list_item">
             <LogoutIcon />
             <h4>Logout</h4>

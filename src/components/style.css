@@ -39,3 +39,7 @@
     width: 80%;
   }
 }
+
+#form-dialog-title {
+  width: 550px;
+}

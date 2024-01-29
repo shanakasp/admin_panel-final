@@ -7,7 +7,7 @@ import "../components/style.css";
 
 const Login = () => {
   const [values, setValues] = useState({
-    username: "", // Change 'email' to 'username'
+    username: "",
     password: "",
   });
   const [error, setError] = useState(null);
@@ -18,16 +18,14 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/admin/login",
+        " http://localhost:8080/admin/login",
         values
       );
 
       if (response.data.status) {
-        // Save the token to localStorage
         localStorage.setItem("token", response.data.token);
 
-        // Redirect to the dashboard or home page
-        navigate("/dashboard");
+        navigate("/dd");
       } else {
         setError(response.data.message);
       }
@@ -50,14 +48,14 @@ const Login = () => {
             <div className="d-flex align-items-center">
               <Email sx={{ fontSize: 18, marginRight: 2 }} />
               <input
-                name="username" // Change 'email' to 'username'
+                name="username"
                 autoComplete="off"
                 placeholder="Enter Username"
                 required
                 onChange={(e) =>
                   setValues((prevValues) => ({
                     ...prevValues,
-                    username: e.target.value, // Change 'email' to 'username'
+                    username: e.target.value,
                   }))
                 }
                 className="form-control rounded-0"

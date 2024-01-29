@@ -1,15 +1,15 @@
 import axios from "axios";
 import { MDBTable, MDBTableBody, MDBTableHead } from "mdb-react-ui-kit";
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 function Question() {
   const [allQuestions, setAllQuestions] = useState([]);
+  const getParam = useParams();
 
   useEffect(() => {
     axios
-      .get(
-        "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/getAllQuestions"
-      )
+      .get("http://localhost:8080/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           setAllQuestions(response.data.result.questions);
@@ -27,18 +27,13 @@ function Question() {
   };
 
   const handleDelete = (questionId) => {
-    // Perform the deletion through an API call
     axios
-      .delete(
-        `http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/deleteQuestion`,
-        {
-          data: { questionId: [questionId] },
-        }
-      )
+      .delete(`http://localhost:8080/questions/deleteQuestion`, {
+        data: { questionId: [questionId] },
+      })
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 
-        // Remove the deleted question from the state
         const updatedQuestions = allQuestions.filter(
           (question) => question.id !== questionId
         );
@@ -74,21 +69,21 @@ function Question() {
           <tr style={{ color: "#646a85" }}>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "50%", fontSize: "25px" }}
+              style={{ color: "blueviolet", width: "50%", fontSize: "20px" }}
             >
               Title
             </th>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "35%", fontSize: "20px" }}
+              style={{ color: "blueviolet", width: "45%", fontSize: "20px" }}
             >
               Input Type
             </th>
             <th
               scope="col"
-              style={{ color: "blueviolet", width: "30%", fontSize: "20px" }}
+              style={{ color: "blueviolet", width: "36%", fontSize: "20px" }}
             >
-              Category ID
+              Ans.
             </th>
             <th
               scope="col"
@@ -101,49 +96,49 @@ function Question() {
 
         <MDBTableBody>
           {Array.isArray(allQuestions) && allQuestions.length > 0 ? (
-            allQuestions.map((question, index) => (
-              <tr key={index}>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {question.title}
-                  </p>
-                </td>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {question.type}
-                  </p>
-                </td>
-                <td>
-                  <p
-                    className="fw-bold mb-1"
-                    style={{ color: "#041083", cursor: "pointer" }}
-                  >
-                    {question.category_id}
-                  </p>
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(question.id)}
-                    className="btn btn-primary rounded-pill"
-                    style={{ marginRight: "10px" }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(question.id)}
-                    className="btn btn-danger rounded-pill"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
+            allQuestions
+              .filter((question) => question.category_id == getParam.id)
+              .map((question, index) => (
+                <tr key={index}>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.title}
+                    </p>
+                  </td>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.type}
+                    </p>
+                  </td>
+                  <td>
+                    <p
+                      className="fw-bold mb-1"
+                      style={{ color: "#041083", cursor: "pointer" }}
+                    >
+                      {question.values.map((value) => value.value).join(", ")}
+                    </p>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleDelete(question.id)}
+                      className="btn btn-danger rounded-pill bg-danger"
+                      style={{
+                        fontSize: "14px",
+                        width: "60px",
+                        padding: "2px",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
           ) : (
             <tr>
               <td colSpan="4">No questions found.</td>

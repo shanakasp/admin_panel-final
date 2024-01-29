@@ -17,7 +17,7 @@ const Centeredtabs = (props) => {
         <Tab
           className="tab"
           label="Questions"
-          style={{ fontSize: "20px" }} // Adjust the font size as needed
+          style={{ fontSize: "20px" }}
           onClick={() => {
             navigate(`/form/${props.paramId}`);
           }}
@@ -25,7 +25,7 @@ const Centeredtabs = (props) => {
         <Tab
           className="tab"
           label="Preview"
-          style={{ fontSize: "20px" }} // Adjust the font size as needed
+          style={{ fontSize: "20px" }}
           onClick={() => {
             navigate(`/preview/${props.paramId}`);
           }}

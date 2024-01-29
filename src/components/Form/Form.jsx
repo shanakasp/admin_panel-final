@@ -1,10 +1,8 @@
-import { Button, IconButton } from "@mui/material";
-import Avatar from "@mui/material/Avatar";
+import { IconButton } from "@mui/material";
 import { motion } from "framer-motion";
 import React from "react";
 import { GrRedo, GrUndo } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
-import painlist from "../../utils/painlist.json";
 import QuestionForm from "../QuestionForm/QuestionForm";
 import Sidebar from "../Sidebar/Sidebar";
 import Centeredtabs from "../Tabs/Tabs";
@@ -24,10 +22,6 @@ const Form = () => {
             alt=""
             className="form_header_image"
           />
-          {painlist.map((pain, i) => {
-            if (pain.id == params.id)
-              return <p className="form_name">{pain.title}</p>;
-          })}
 
           {/* <input type="text" placeholder="Untitled Form" className="form_name" /> */}
         </div>
@@ -47,17 +41,7 @@ const Form = () => {
             <GrRedo className="form_header_icon" />
           </IconButton>
 
-          <Button variant="contained" className="form_header_button">
-            Send
-          </Button>
-
-          <IconButton>
-            <Avatar
-              className="form_header_icon"
-              style={{ height: "30px", width: "30px" }}
-              src=".././images/knee.jpeg"
-            />
-          </IconButton>
+          <IconButton></IconButton>
         </div>
       </div>
       <div>

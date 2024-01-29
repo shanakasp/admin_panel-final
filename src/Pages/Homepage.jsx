@@ -1,18 +1,17 @@
-import React,{useState} from 'react'
+import React, { useState } from "react";
 
-import Template from '../components/Template/Template'
-import Mainbody from '../components/MainBody/Mainbody'
-import Header from '../components/Header/Header'
+import Header from "../components/Header/Header";
+import Mainbody from "../components/MainBody/Mainbody";
 const Homepage = () => {
-  const [search,setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
   return (
-    <div > 
-      <Header search={search} setSearch={setSearch}/>
+    <div>
+      <Header search={search} setSearch={setSearch} />
       {/* <Template search={search}/> */}
-      <Mainbody/>
+      <Mainbody />
     </div>
-  )
-}
+  );
+};
 
-export default Homepage
+export default Homepage;

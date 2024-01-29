@@ -1,15 +1,41 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header";
 
 function Profile() {
+  const navigate = useNavigate();
+
   const [userName, setUserName] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState([]);
 
   const handleChangePassword = () => {
+    // Clear previous error messages
+    setErrorMessages([]);
+
+    // Validate inputs
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setErrorMessages(["All fields must be filled"]);
+      // Reset input fields to null
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setErrorMessages(["Entered passwords do not match"]);
+      // Reset input fields to null
+      setNewPassword("");
+      setConfirmPassword("");
+      setOldPassword("");
+      return;
+    }
+
     // Create the request payload
     const requestBody = {
       oldPassword,
@@ -17,16 +43,13 @@ function Profile() {
     };
 
     // Make the API request
-    fetch(
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/admin/changeSuperAdminPassword/1",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    )
+    fetch("http://localhost:8080/admin/changeSuperAdminPassword/1", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
       .then((response) => {
         if (response.ok) {
           return response.json();
@@ -36,16 +59,24 @@ function Profile() {
       })
       .then((data) => {
         setMessage("Password changed successfully!");
-        // Handle any additional logic or update the state as needed
+        // Navigate to the home page ("/") after successful password change
+        navigate("/");
       })
       .catch((error) => {
-        setMessage(error.message);
+        setErrorMessages([error.message]);
       });
+  };
+
+  // Function to display error messages for 4 seconds
+  const displayErrorMessages = () => {
+    setTimeout(() => {
+      setErrorMessages([]);
+    }, 4000);
   };
 
   return (
     <div>
-      <Header></Header>
+      <Header />
       <Container maxWidth="sm">
         <Box
           sx={{
@@ -56,9 +87,7 @@ function Profile() {
           }}
         >
           <Typography variant="h4">Profile</Typography>
-          {/*<Box mt={2}>
-            <Typography variant="h6">User Name: {userName}</Typography>
-          </Box> */}
+
           <Box mt={4}>
             <Typography variant="h5">Change Password</Typography>
             <TextField
@@ -88,10 +117,18 @@ function Profile() {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleChangePassword}
+              onClick={() => {
+                handleChangePassword();
+                displayErrorMessages();
+              }}
             >
               Change Password
             </Button>
+            {errorMessages.map((error, index) => (
+              <Typography key={index} color="error" mt={2}>
+                {error}
+              </Typography>
+            ))}
             <Typography mt={2}>{message}</Typography>
           </Box>
         </Box>

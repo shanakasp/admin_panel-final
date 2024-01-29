@@ -91,7 +91,6 @@ function QuestionForm() {
   };
 
   const saveQuestions = () => {
-    // Assuming there's at least one question
     if (questions.length === 0) {
       console.error("No questions to save.");
       return;
@@ -99,9 +98,9 @@ function QuestionForm() {
 
     const saveQuestionsData = {
       categoryId: categoryId,
-      title: questions[0].questionText, // Set title to the first question's text
-      type: "dropdown", // Default type for dropdown questions
-      values: [], // Default empty array for dropdown values
+      title: questions[0].questionText,
+      type: "dropdown",
+      values: [],
     };
 
     const textQuestions = questions.filter(
@@ -109,49 +108,59 @@ function QuestionForm() {
     );
 
     if (textQuestions.length > 0) {
-      // Handle "Text" type questions
       saveQuestionsData.type = "text";
       saveQuestionsData.values = textQuestions.map((ques) => ({
         value: ques.answerText,
       }));
     } else {
-      // Handle "Dropdown" type questions
       if (questions[0].options && questions[0].options.length > 0) {
         saveQuestionsData.values = questions[0].options.map((option) => ({
           value: option.optionText,
         }));
       } else {
-        // Handle the case where there are no options
         console.error("Dropdown question should have options.");
-        return; // Do not proceed with the request
+        return;
       }
     }
 
-    // Ensure that title and type are present
     if (!saveQuestionsData.title || !saveQuestionsData.type) {
       console.error("Title and type are required.");
-      return; // Do not proceed with the request
+      return;
     }
 
-    // Continue with the fetch request
-    fetch(
-      "http://ec2-3-139-78-36.us-east-2.compute.amazonaws.com:8000/questions/addQuestion",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(saveQuestionsData),
-      }
-    )
+    fetch("http://localhost:8080/questions/addQuestion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(saveQuestionsData),
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log("Questions saved successfully:", data);
-        // Handle any additional logic or update the state as needed
+
+        setCategoryId(id);
+        setQuestions([
+          {
+            questionText: "",
+            questionType: "dropdown",
+            options: [
+              { optionText: "" },
+              { optionText: "" },
+              { optionText: "" },
+            ],
+            answer: false,
+            answerKey: "",
+            point: 0,
+            open: true,
+            required: false,
+          },
+        ]);
+        setDocumentName("Add Questions");
+        setDocumentDesc("Form Description");
       })
       .catch((error) => {
         console.error("Error saving questions:", error);
-        // Handle errors or display an error message to the user
       });
   };
 
@@ -177,7 +186,7 @@ function QuestionForm() {
               variant="outlined"
               value={ques.questionText}
               onChange={(e) => changeQuestion(e.target.value, i)}
-              style={{ width: "600px" }}
+              style={{ width: "300px" }}
             />
           </div>
           <div>
@@ -185,7 +194,11 @@ function QuestionForm() {
               label="Question Type"
               value={ques.questionType}
               onChange={(e) => changeQuestionType(e.target.value, i)}
-              style={{ marginLeft: "300px" }}
+              style={{
+                marginLeft: "200px",
+                marginBottom: "20px",
+                marginTop: "10px",
+              }}
             >
               <MenuItem value="dropdown">Dropdown</MenuItem>
               <MenuItem value="text">Text</MenuItem>
