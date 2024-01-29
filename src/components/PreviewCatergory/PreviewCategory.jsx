@@ -41,9 +41,7 @@ function PreviewCategory() {
   };
 
   useEffect(() => {
-    fetch(
-      "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
-    )
+    fetch("http://localhost:8080/category/getAllCategories")
       .then((response) => response.json())
       .then((data) => setCategories(data.result.data))
       .catch((error) => console.error("Error fetching data:", error));
@@ -116,7 +114,7 @@ function PreviewCategory() {
 
         // Save category name and image URL in the database
         fetch(
-          `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/updateCategoryByID/${editCategoryId}`,
+          `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
           {
             method: "PUT",
             headers: {
@@ -135,9 +133,7 @@ function PreviewCategory() {
             handleEditDialogClose();
 
             // Fetch updated data from the server
-            fetch(
-              "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
-            )
+            fetch("http://localhost:8080/category/getAllCategories")
               .then((response) => response.json())
               .then((data) => setCategories(data.result.data))
               .catch((error) => console.error("Error fetching data:", error));
@@ -151,7 +147,7 @@ function PreviewCategory() {
     } else {
       // If no new image is selected, update only the category name
       fetch(
-        `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/updateCategoryByID/${editCategoryId}`,
+        `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
         {
           method: "PUT",
           headers: {
@@ -170,9 +166,7 @@ function PreviewCategory() {
           handleEditDialogClose();
 
           // Fetch updated data from the server
-          fetch(
-            "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
-          )
+          fetch("http://localhost:8080/category/getAllCategories")
             .then((response) => response.json())
             .then((data) => setCategories(data.result.data))
             .catch((error) => console.error("Error fetching data:", error));
@@ -190,7 +184,7 @@ function PreviewCategory() {
 
   const handleConfirmDelete = () => {
     fetch(
-      `http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/deleteCategoryByID/${deleteCategoryId}`,
+      `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
       {
         method: "DELETE",
       }
@@ -199,9 +193,7 @@ function PreviewCategory() {
       .then((data) => {
         console.log("Category deleted successfully:", data);
 
-        fetch(
-          "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/category/getAllCategories"
-        )
+        fetch("http://localhost:8080/category/getAllCategories")
           .then((response) => response.json())
           .then((data) => setCategories(data.result.data))
           .catch((error) => console.error("Error fetching data:", error));
@@ -271,10 +263,10 @@ function PreviewCategory() {
               >
                 <Button
                   variant="contained"
-                  color="primary"
+                  color="#2196f3"
                   style={{
                     fontSize:
-                      category.category_name.length > 15 ? "14px" : "18px",
+                      category.category_name.length > 10 ? "14px" : "18px",
                     lineHeight:
                       category.category_name.length > 10 ? "1.4" : "1.2",
                     marginTop: "10px",
@@ -387,15 +379,23 @@ function PreviewCategory() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText style={{ fontSize: "17px", color: "black" }}>
-            Are you sure to delete the category? This will remove this category
-            and relevant questions too.
+            Are you sure you want to delete this category? This will remove this
+            category and relevant questions too.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
+          <Button
+            onClick={handleCancelDelete}
+            color="secondary"
+            style={{ border: "1px solid #000" }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
+          <Button
+            onClick={handleConfirmDelete}
+            color="secondary"
+            style={{ border: "1px solid #000" }}
+          >
             Confirm Delete
           </Button>
         </DialogActions>

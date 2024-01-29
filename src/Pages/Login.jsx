@@ -18,7 +18,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://ec2-3-144-111-86.us-east-2.compute.amazonaws.com:8080/admin/login",
+        " http://localhost:8080/admin/login",
         values
       );
 
