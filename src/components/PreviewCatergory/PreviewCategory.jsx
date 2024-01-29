@@ -263,16 +263,19 @@ function PreviewCategory() {
               >
                 <Button
                   variant="contained"
-                  color="#2196f3"
+                  color="primary"
                   style={{
-                    fontSize:
-                      category.category_name.length > 10 ? "14px" : "18px",
-                    lineHeight:
-                      category.category_name.length > 10 ? "1.4" : "1.2",
+                    fontSize: `${
+                      category.category_name.length > 15 ? "14px" : "20px"
+                    }`,
+                    lineHeight: `${
+                      category.category_name.length > 15 ? "1.4" : "1.2"
+                    }`,
                     marginTop: "10px",
                     transition: "color 0.3s ease-in-out",
                     width: "100%",
-                    textTransform: "none", // Set to "none" to prevent uppercase transformation
+                    textTransform: "none",
+                    whiteSpace: "pre-line", // Allows for line breaks
                   }}
                   onMouseOver={(e) =>
                     (e.target.style.backgroundColor = "#3f51b5")
@@ -346,11 +349,15 @@ function PreviewCategory() {
           {/* Display current image preview */}
           {editImageUrl && (
             <div style={{ marginBottom: "10px" }}>
-              <p>Current Image Preview:</p>
+              <strong>Current Image Preview:</strong>
               <img
                 src={editImageUrl}
                 alt="Current Preview"
-                style={{ maxWidth: "100%", maxHeight: "200px" }}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "200px",
+                  marginTop: "10px",
+                }}
               />
             </div>
           )}
@@ -365,41 +372,50 @@ function PreviewCategory() {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={isDeleteDialogOpen}
-        onClose={handleCancelDelete}
-        aria-labelledby="form-dialog-title"
-      >
-        <DialogTitle
-          id="form-dialog-title"
-          style={{ fontSize: "20px", fontWeight: "bold", color: "red" }}
+      <div className="delete">
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={handleCancelDelete}
+          aria-labelledby="form-dialog-title"
         >
-          Warning!
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText style={{ fontSize: "17px", color: "black" }}>
-            Are you sure you want to delete this category? This will remove this
-            category and relevant questions too.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCancelDelete}
-            color="secondary"
-            style={{ border: "1px solid #000" }}
+          <DialogTitle
+            id="form-dialog-title"
+            style={{ fontSize: "20px", fontWeight: "bold", color: "red" }}
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color="secondary"
-            style={{ border: "1px solid #000" }}
-          >
-            Confirm Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+            Warning!
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText
+              style={{
+                fontSize: "17px",
+                color: "black",
+                maxWidth: "none", // Allow content to spread along width
+                margin: 0, // Remove margin
+              }}
+            >
+              Are you sure you want to delete this category? <br></br> This will
+              remove category and relevant questions too.
+            </DialogContentText>
+            <DialogActions className="buttons">
+              <Button
+                onClick={handleCancelDelete}
+                color="secondary"
+                style={{ border: "1px solid #000" }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                color="secondary"
+                style={{ border: "1px solid #000" }}
+              >
+                Confirm Delete
+              </Button>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
