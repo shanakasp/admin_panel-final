@@ -1,7 +1,5 @@
-import { IconButton } from "@mui/material";
 import { motion } from "framer-motion";
 import React from "react";
-import { GrRedo, GrUndo } from "react-icons/gr";
 import { useNavigate, useParams } from "react-router-dom";
 import QuestionForm from "../QuestionForm/QuestionForm";
 import Sidebar from "../Sidebar/Sidebar";
@@ -25,24 +23,7 @@ const Form = () => {
 
           {/* <input type="text" placeholder="Untitled Form" className="form_name" /> */}
         </div>
-        <div className="form_header_right">
-          {/* <IconButton>
-                <AiOutlineEye className="form_header_icon"/>
-            </IconButton>
-            <IconButton>
-                <FiSettings className="form_header_icon"/>
-            </IconButton> */}
-
-          <IconButton onClick={() => navigate(-1)}>
-            <GrUndo className="form_header_icon" />
-          </IconButton>
-
-          <IconButton onClick={() => navigate(+1)}>
-            <GrRedo className="form_header_icon" />
-          </IconButton>
-
-          <IconButton></IconButton>
-        </div>
+        <div className="form_header_right"></div>
       </div>
       <div>
         <Centeredtabs paramId={params.id} />

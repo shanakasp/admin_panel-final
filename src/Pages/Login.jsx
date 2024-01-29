@@ -1,4 +1,6 @@
 import { Email, Lock } from "@mui/icons-material";
+import { Snackbar } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState } from "react";
@@ -10,7 +12,12 @@ const Login = () => {
     username: "",
     password: "",
   });
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+  });
   const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -18,14 +25,18 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        " http://localhost:8080/admin/login",
+        "http://localhost:8080/admin/login",
         values
       );
 
       if (response.data.status) {
         localStorage.setItem("token", response.data.token);
 
-        navigate("/dd");
+        setOpenSnackbar(true); // Open the success snackbar
+        setTimeout(() => {
+          setOpenSnackbar(false); // Close the snackbar after 1 second
+          navigate("/dd");
+        }, 1000);
       } else {
         setError(response.data.message);
       }
@@ -35,37 +46,47 @@ const Login = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    setValues({
+      ...values,
+      [e.target.name]: e.target.value,
+    });
+
+    setErrors({
+      ...errors,
+      [e.target.name]: "", // Clear the validation error when the user types
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
       <div className="p-4 rounded w-400 h-400 border loginForm">
-        <div className="text-warning">{error && error}</div>
-        <h3>Login</h3>
+        <h3 className="mb-4">Login</h3>
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="position-relative w-100 ">
-              <strong>Username:</strong>
-            </label>
-            <div className="d-flex align-items-center">
+          <div className="mb-4">
+            <div className="d-flex align-items-center ">
               <Email sx={{ fontSize: 18, marginRight: 2 }} />
               <input
                 name="username"
                 autoComplete="off"
                 placeholder="Enter Username"
                 required
-                onChange={(e) =>
-                  setValues((prevValues) => ({
-                    ...prevValues,
-                    username: e.target.value,
-                  }))
-                }
-                className="form-control rounded-0"
+                onChange={handleInputChange}
+                className={`form-control rounded-3 ${
+                  errors.username && "border border-danger"
+                }`}
               />
+              <div className="text-danger">{errors.username}</div>
             </div>
           </div>
           <div className="mb-3">
-            <label htmlFor="password">
-              <strong>Password:</strong>
-            </label>
             <div className="d-flex align-items-center">
               <Lock sx={{ fontSize: 18, marginRight: 2 }} />
               <input
@@ -73,15 +94,16 @@ const Login = () => {
                 name="password"
                 placeholder="Enter Password"
                 required
-                onChange={(e) =>
-                  setValues((prevValues) => ({
-                    ...prevValues,
-                    password: e.target.value,
-                  }))
-                }
-                className="form-control rounded-0"
+                onChange={handleInputChange}
+                className={`form-control rounded-3 ${
+                  errors.password && "border border-danger"
+                }`}
               />
+              <div className="text-danger">{errors.password}</div>
             </div>
+          </div>
+          <div className="text-danger mb-4" style={{ fontSize: "1.5rem" }}>
+            {error && <strong>{error}</strong>}
           </div>
           <div className="text-center">
             <button
@@ -93,6 +115,21 @@ const Login = () => {
           </div>
         </form>
       </div>
+      {/* Snackbar for login success */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={1000} // Adjust as needed
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Logging Successful
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };

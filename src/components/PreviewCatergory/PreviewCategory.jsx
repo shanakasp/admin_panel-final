@@ -233,7 +233,7 @@ function PreviewCategory() {
                 </Link>
 
                 {/* Two Buttons */}
-                <div className="buttonsContainer">
+                <div className="buttonsContainer" style={{ display: "flex" }}>
                   {/* Edit Icon */}
                   <IconButton
                     color="primary"
@@ -248,47 +248,41 @@ function PreviewCategory() {
                     <Edit />
                   </IconButton>
 
+                  {/* Category Name with Link */}
+                  <Link
+                    to={`/form/${category.category_id}`}
+                    style={{ textDecoration: "none", flex: 1 }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      style={{
+                        fontSize: `${
+                          category.category_name.length > 15 ? "14px" : "20px"
+                        }`,
+                        lineHeight: `${
+                          category.category_name.length > 15 ? "1.4" : "1.2"
+                        }`,
+                        marginTop: "10px",
+                        transition: "color 0.3s ease-in-out",
+                        width: "100%",
+                        textTransform: "none",
+                        whiteSpace: "pre-line", // Allows for line breaks
+                      }}
+                    >
+                      {category.category_name}
+                    </Button>
+                  </Link>
+
                   {/* Delete Icon */}
                   <IconButton
-                    color="secondary"
+                    color="error"
                     onClick={() => handleDeleteClick(category.category_id)}
                   >
                     <Delete />
                   </IconButton>
                 </div>
               </div>
-
-              {/* Category Name with Link */}
-              <Link
-                to={`/form/${category.category_id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  style={{
-                    fontSize: `${
-                      category.category_name.length > 15 ? "14px" : "20px"
-                    }`,
-                    lineHeight: `${
-                      category.category_name.length > 15 ? "1.4" : "1.2"
-                    }`,
-                    marginTop: "10px",
-                    transition: "color 0.3s ease-in-out",
-                    width: "100%",
-                    textTransform: "none",
-                    whiteSpace: "pre-line", // Allows for line breaks
-                  }}
-                  onMouseOver={(e) =>
-                    (e.target.style.backgroundColor = "#3f51b5")
-                  }
-                  onMouseOut={(e) =>
-                    (e.target.style.backgroundColor = "#2196f3")
-                  }
-                >
-                  {category.category_name}
-                </Button>
-              </Link>
             </CardContent>
           </Card>
         ))}
@@ -344,10 +338,8 @@ function PreviewCategory() {
             label="New Category Name"
             type="text"
             fullWidth
-            multiline
             value={editCategoryName}
             onChange={(e) => setEditCategoryName(e.target.value)}
-            style={{ wordWrap: "break-word" }}
           />
 
           {/* Display current image preview */}

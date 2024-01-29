@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  CssBaseline,
   TextField,
   ThemeProvider,
   Typography,
@@ -132,10 +133,11 @@ const AddCategory = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <div>
         <Header />
 
-        <Container className="containerborder" maxWidth="sm">
+        <Container component="main" maxWidth="sm">
           {successMessage && (
             <Alert severity="success" sx={{ marginTop: 2 }}>
               {successMessage}
@@ -153,10 +155,9 @@ const AddCategory = () => {
             }}
           >
             <Typography variant="h4">Add Category</Typography>
-            <Box mt={4}>
-              <Typography variant="h6">Enter Category Name</Typography>
+            <Box mt={2}>
               <TextField
-                label="Category Name"
+                label="Enter Category Name"
                 type="text"
                 fullWidth
                 margin="normal"
@@ -171,7 +172,7 @@ const AddCategory = () => {
 
               <Typography
                 variant="h6"
-                style={{ marginBottom: "10px", marginTop: "10px" }}
+                style={{ marginBottom: "15px", marginTop: "12px" }}
               >
                 Select Category Image
               </Typography>
@@ -196,15 +197,14 @@ const AddCategory = () => {
                   }}
                 />
               )}
-
-              <br />
+              <br></br>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleAddCategory}
                 style={{
                   marginBottom: "10px",
-                  marginTop: "20px",
+                  marginTop: "25px",
                 }}
               >
                 Add Category
