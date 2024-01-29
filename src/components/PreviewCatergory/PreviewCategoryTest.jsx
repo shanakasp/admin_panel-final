@@ -199,10 +199,11 @@ function PreviewCategory() {
             label="New Category Name"
             type="text"
             fullWidth
+            multiline
+            rows={10} // Adjust the number of rows as needed
             value={editCategoryName}
             onChange={(e) => setEditCategoryName(e.target.value)}
           />
-
           {/* Display current image preview */}
           {editImageUrl && (
             <div style={{ marginBottom: "10px" }}>

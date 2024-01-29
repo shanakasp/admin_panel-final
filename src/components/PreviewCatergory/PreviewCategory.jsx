@@ -31,6 +31,8 @@ function PreviewCategory() {
   const [deleteCategoryId, setDeleteCategoryId] = useState(null);
   const [notification, setNotification] = useState(null);
 
+  const MAX_CHARACTERS = 50;
+
   const uploadImageToFirebase = async (selectedFile) => {
     const storageRef = storage.ref();
     const imageRef = storageRef.child(`images/${selectedFile.name}`);
@@ -342,8 +344,10 @@ function PreviewCategory() {
             label="New Category Name"
             type="text"
             fullWidth
+            multiline
             value={editCategoryName}
             onChange={(e) => setEditCategoryName(e.target.value)}
+            style={{ wordWrap: "break-word" }}
           />
 
           {/* Display current image preview */}
