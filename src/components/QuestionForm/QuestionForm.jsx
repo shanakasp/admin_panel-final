@@ -7,11 +7,9 @@ import {
   Accordion,
   AccordionDetails,
   Button,
-  FormControlLabel,
   IconButton,
   MenuItem,
   Select,
-  Switch,
   TextField,
 } from "@mui/material";
 import React, { useState } from "react";
@@ -93,6 +91,26 @@ function QuestionForm() {
   const saveQuestions = () => {
     if (questions.length === 0) {
       console.error("No questions to save.");
+      return;
+    }
+
+    // Check if there are any answers
+    // Check if there are any answers
+    const hasAnswers =
+      questions.some(
+        (ques) =>
+          ques.questionType === "text" &&
+          ques.answerText !== undefined &&
+          ques.answerText.trim() !== ""
+      ) ||
+      (questions[0].options &&
+        questions[0].options.some(
+          (option) =>
+            option.optionText !== undefined && option.optionText.trim() !== ""
+        ));
+
+    if (!hasAnswers) {
+      console.error("Please provide answers before saving.");
       return;
     }
 
@@ -238,17 +256,6 @@ function QuestionForm() {
           <IconButton onClick={() => deleteQuestion(i)}>
             <DeleteOutlineIcon />
           </IconButton>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={ques.required}
-                onChange={() => requiredQuestion(i)}
-                name="required"
-                color="primary"
-              />
-            }
-            label="Required"
-          />
         </div>
       </Accordion>
     ));
