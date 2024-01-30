@@ -30,7 +30,7 @@ function PreviewCategory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null); // Added state for the selected image file
-
+  const [errorMessage, setErrorMessage] = useState("");
   const uploadImageToFirebase = async (selectedFile) => {
     const storageRef = storage.ref();
     const imageRef = storageRef.child(`images/${selectedFile.name}`);
@@ -81,24 +81,30 @@ function PreviewCategory() {
 
   const handleEditSave = async () => {
     try {
+      let requestBody = {};
+
       // Validate category name
-      if (!editCategoryName.trim()) {
-        console.error("Please enter category name.");
-        return;
+      if (editCategoryName.trim()) {
+        requestBody.category_name = editCategoryName;
       }
 
       // Validate image
-      if (!selectedImageFile) {
-        console.error("Please upload an image for the category.");
+      if (selectedImageFile) {
+        const imageRef = ref(
+          storage,
+          `images/${selectedImageFile.name + v4()}`
+        );
+        const snapshot = await uploadBytes(imageRef, selectedImageFile);
+        const imageUrl = await getDownloadURL(snapshot.ref);
+        requestBody.image_url = imageUrl;
+      }
+
+      if (!editCategoryName.trim()) {
+        setErrorMessage("Category name cannot be empty");
         return;
       }
 
-      // Upload the new image to Firebase
-      const imageRef = ref(storage, `images/${selectedImageFile.name + v4()}`);
-      const snapshot = await uploadBytes(imageRef, selectedImageFile);
-      const imageUrl = await getDownloadURL(snapshot.ref);
-
-      // Save category name and image URL in the database
+      // Save category name and/or image URL in the database
       await fetch(
         `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
         {
@@ -106,10 +112,7 @@ function PreviewCategory() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            category_name: editCategoryName,
-            image_url: imageUrl,
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
@@ -120,10 +123,14 @@ function PreviewCategory() {
       const data = await response.json();
       setCategories(data.result.data);
 
+      // Reset values to null
+      setEditCategoryName(null);
+      setEditImageUrl(null);
+      setSelectedImageFile(null);
+
       handleEditDialogClose();
     } catch (error) {
       console.error("Error updating category:", error);
-
       // Handle error as needed, e.g., set an error notification
     }
   };

@@ -277,7 +277,7 @@ function PreviewCategory() {
 
           {/* Display current image preview */}
           {imagePreview && (
-            <div style={{ marginBottom: "10px" }}>
+            <div style={{ margin: "10px" }}>
               <strong>Image Preview:</strong>{" "}
               <img
                 src={imagePreview}
@@ -301,7 +301,7 @@ function PreviewCategory() {
 
           {/* Display current image preview */}
           {editImageUrl && (
-            <div style={{ marginBottom: "10px" }}>
+            <div className="current_image_headline">
               <strong>Current Image Preview:</strong>
               <img
                 src={editImageUrl}
@@ -314,24 +314,27 @@ function PreviewCategory() {
               />
             </div>
           )}
-          <div>
-            Select new image
+          <div className="new_image">
+            <strong> Select new image</strong>
+
             <br />
-            <input
-              type="file"
-              accept=".jpg, .jpeg, .png, .gif, .tiff, .eps, .raw"
-              onChange={handleImageChange} // Handle the file change event
-            />
+            <div className="new_image_select">
+              <input
+                type="file"
+                accept=".jpg, .jpeg, .png, .gif, .tiff, .eps, .raw"
+                onChange={handleImageChange} // Handle the file change event
+              />
+            </div>
+            <DialogContent className="bottom_button">
+              <Button onClick={handleEditDialogClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleEditSave} color="primary">
+                Save
+              </Button>
+            </DialogContent>
           </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEditDialogClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleEditSave} color="primary">
-            Save
-          </Button>
-        </DialogActions>
       </Dialog>
 
       <div className="delete">

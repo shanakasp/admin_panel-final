@@ -17,7 +17,7 @@ body {
 .card {
   width: 100%;
   max-width: 400px;
-  height: 300px;
+  height: fit-content;
   gap: 20px;
   margin: auto; /* Center the container horizontally by default */
   text-align: center;
@@ -84,4 +84,16 @@ body {
 .catName {
   text-align: justify;
   margin: auto;
+}
+
+.new_image_select {
+  margin: 10px;
+}
+
+.current_image_headline {
+  margin: 10px;
+}
+
+.bottombutton {
+  text-align: right;
 }

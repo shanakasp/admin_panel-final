@@ -9,7 +9,7 @@ import FormPreview from "./components/FormPreview/FormPreview";
 // import Template from './components/Template/Template'
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddCategory from "./components/AddCategory/AddCategory";
-import PreviewCategory from "./components/PreviewCatergory/PreviewCategory";
+import PreviewCategoryTest from "./components/PreviewCatergory/PreviewCategoryTest";
 import Profile from "./components/Profile/Profile";
 import PrivateRoutes from "./utils/PrivateRoutes";
 
@@ -26,7 +26,7 @@ const App = () => {
             <Route path="/dashboard" element={<Components />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/addcategory" element={<AddCategory />} />
-            <Route path="/dd" element={<PreviewCategory />} />{" "}
+            <Route path="/dd" element={<PreviewCategoryTest />} />{" "}
           </Route>
           <Route path="/" element={<Login />} />
         </Routes>
