@@ -291,7 +291,7 @@ function QuestionForm() {
           <div className="col-md-8">
             <h3>Add Questions</h3>
             {/* Loading animation */}
-            {loading && <CircularProgress style={{ marginTop: "20px" }} />}
+            {loading && <CircularProgress style={{ margin: "20px" }} />}
           </div>
         </div>
 
