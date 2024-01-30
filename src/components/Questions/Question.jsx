@@ -5,23 +5,31 @@ import {
   Card,
   CardActions,
   CardContent,
+  CircularProgress,
   Grid,
   Modal,
   Pagination,
   Paper,
   Typography,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
+import Snackbar from "@mui/material/Snackbar";
 import axios from "axios";
 import { MDBTable, MDBTableBody, MDBTableHead } from "mdb-react-ui-kit";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 function Question() {
   const [allQuestions, setAllQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [questionsPerPage] = useState(10); // Adjust as needed
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [loadingMap, setLoadingMap] = useState({}); // Map to store loading state for each question
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const getParam = useParams();
 
   useEffect(() => {
@@ -60,6 +68,12 @@ function Question() {
   };
 
   const handleDelete = (questionId) => {
+    // Set loading state for the specific question to true
+    setLoadingMap((prevLoadingMap) => ({
+      ...prevLoadingMap,
+      [questionId]: true,
+    }));
+
     axios
       .delete(`http://localhost:8080/questions/deleteQuestion`, {
         data: { questionId: [questionId] },
@@ -67,18 +81,45 @@ function Question() {
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 
-        const updatedQuestions = allQuestions.filter(
-          (question) => question.id !== questionId
-        );
-        setAllQuestions(updatedQuestions);
+        setTimeout(() => {
+          const updatedQuestions = allQuestions.filter(
+            (question) => question.id !== questionId
+          );
+          setAllQuestions(updatedQuestions);
 
-        // Close details modal if the deleted question was open
-        if (selectedQuestion && selectedQuestion.id === questionId) {
-          setSelectedQuestion(null);
-        }
+          if (selectedQuestion && selectedQuestion.id === questionId) {
+            setSelectedQuestion(null);
+          }
+
+          // Show success notification
+          setNotification({
+            open: true,
+            message: "Deleted successfully",
+            severity: "success",
+          });
+
+          // Reset loading state for the specific question
+          setLoadingMap((prevLoadingMap) => ({
+            ...prevLoadingMap,
+            [questionId]: false,
+          }));
+        }, 2000);
       })
       .catch((error) => {
         console.error("Error deleting:", error);
+
+        // Show error notification
+        setNotification({
+          open: true,
+          message: "Error deleting",
+          severity: "error",
+        });
+
+        // Reset loading state for the specific question
+        setLoadingMap((prevLoadingMap) => ({
+          ...prevLoadingMap,
+          [questionId]: false,
+        }));
       });
   };
 
@@ -92,8 +133,27 @@ function Question() {
           <Typography variant="h5" color="primary" gutterBottom>
             Questions
           </Typography>
-          <MDBTable responsive>
-            <MDBTableHead style={{ alignSelf: "center" }}>
+          <div className="notification">
+            <Snackbar
+              open={notification.open}
+              autoHideDuration={3000}
+              onClose={() => setNotification({ ...notification, open: false })}
+            >
+              <MuiAlert
+                elevation={6}
+                variant="filled"
+                onClose={() =>
+                  setNotification({ ...notification, open: false })
+                }
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                severity={notification.severity}
+              >
+                {notification.message}
+              </MuiAlert>
+            </Snackbar>
+          </div>
+          <MDBTable style={{}}>
+            <MDBTableHead style={{ alignSelf: "center", width: "700px" }}>
               <tr style={{ color: "#041083" }}>
                 <th scope="col" style={{ color: "#041083", width: "30%" }}>
                   Title
@@ -104,7 +164,7 @@ function Question() {
                 <th scope="col" style={{ color: "#041083", width: "30%" }}>
                   Ans.
                 </th>
-                <th scope="col" style={{ color: "#041083", width: "10%" }}>
+                <th scope="col" style={{ color: "#041083", width: "5%" }}>
                   Action
                 </th>
               </tr>
@@ -121,12 +181,16 @@ function Question() {
                         style={{
                           color: "#000000",
                           cursor: "pointer",
-                          fontSize: "14px",
+                          fontSize: "15px",
+                          maxWidth: "12ch",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {`${
                           (currentPage - 1) * questionsPerPage + index + 1
-                        }. ${question.title}`}
+                        }. ${question.title.slice(0, 15)}`}
                       </Typography>
                     </td>
                     <td>
@@ -135,7 +199,7 @@ function Question() {
                         style={{
                           color: "#000000",
                           cursor: "pointer",
-                          fontSize: "14px",
+                          fontSize: "15px",
                           textTransform: "capitalize",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -153,7 +217,7 @@ function Question() {
                         style={{
                           color: "#000000",
                           cursor: "pointer",
-                          fontSize: "14px",
+                          fontSize: "15px",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -175,15 +239,20 @@ function Question() {
                         color="error"
                         size="small"
                         onClick={() => handleDelete(question.id)}
+                        disabled={loadingMap[question.id]} // Disable the button when loading
                       >
-                        <DeleteIcon />
+                        {loadingMap[question.id] ? (
+                          <CircularProgress size={20} color="inherit" />
+                        ) : (
+                          <DeleteIcon />
+                        )}
                       </IconButton>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5">No questions found.</td>
+                  <td colSpan="4">No questions found.</td>
                 </tr>
               )}
             </MDBTableBody>
@@ -243,10 +312,11 @@ function Question() {
               onClick={handleCloseDetails}
               color="primary"
               style={{
-                backgroundColor: "#1367F9 ", // Your desired background color
-                color: "#fff", // Your desired text color
+                backgroundColor: "#1367F9",
+                color: "#fff",
                 borderRadius: "5px",
-                marginLeft: "5px", // Your desired border-radius
+                marginLeft: "5px",
+                fontSize: "12px", // Adjust the font size as needed
               }}
             >
               Close

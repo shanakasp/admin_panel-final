@@ -1,3 +1,7 @@
 .popup {
   color: #d51313;
 }
+
+.notification {
+  text-align: right;
+}
