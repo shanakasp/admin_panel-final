@@ -94,26 +94,6 @@ function QuestionForm() {
       return;
     }
 
-    // Check if there are any answers
-    // Check if there are any answers
-    const hasAnswers =
-      questions.some(
-        (ques) =>
-          ques.questionType === "text" &&
-          ques.answerText !== undefined &&
-          ques.answerText.trim() !== ""
-      ) ||
-      (questions[0].options &&
-        questions[0].options.some(
-          (option) =>
-            option.optionText !== undefined && option.optionText.trim() !== ""
-        ));
-
-    if (!hasAnswers) {
-      console.error("Please provide answers before saving.");
-      return;
-    }
-
     const saveQuestionsData = {
       categoryId: categoryId,
       title: questions[0].questionText,
@@ -141,11 +121,32 @@ function QuestionForm() {
       }
     }
 
-    if (!saveQuestionsData.title || !saveQuestionsData.type) {
-      console.error("Title and type are required.");
+    if (!saveQuestionsData.title) {
+      console.error("Question is required.");
       return;
     }
+    if (!saveQuestionsData.type) {
+      console.error("Type is required.");
+      return;
+    }
+    // Check if there are any answers
+    const hasAnswers =
+      questions.some(
+        (ques) =>
+          ques.questionType === "text" &&
+          ques.answerText !== undefined &&
+          ques.answerText.trim() !== ""
+      ) ||
+      (questions[0].options &&
+        questions[0].options.some(
+          (option) =>
+            option.optionText !== undefined && option.optionText.trim() !== ""
+        ));
 
+    if (!hasAnswers) {
+      console.error("Please provide answers before saving.");
+      return;
+    }
     fetch("http://localhost:8080/questions/addQuestion", {
       method: "POST",
       headers: {
