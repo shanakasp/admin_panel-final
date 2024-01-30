@@ -7,11 +7,14 @@ import {
   Accordion,
   AccordionDetails,
   Button,
+  CircularProgress, // Make sure CircularProgress is imported
   IconButton,
   MenuItem,
   Select,
+  Snackbar,
   TextField,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -33,6 +36,13 @@ function QuestionForm() {
 
   const [documentName, setDocumentName] = useState("Add Questions");
   const [documentDesc, setDocumentDesc] = useState("Form Description");
+
+  const [loading, setLoading] = useState(false);
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
+
+  const handleSuccessSnackbarClose = () => {
+    setSuccessSnackbarOpen(false);
+  };
 
   const changeQuestion = (text, i) => {
     const newQuestions = [...questions];
@@ -64,28 +74,11 @@ function QuestionForm() {
     }
   };
 
-  const addMoreQuestionField = () => {
-    const addMoreQuestions = [...questions];
-    addMoreQuestions.push({
-      questionText: "",
-      questionType: "dropdown",
-      options: [{ optionText: "a" }],
-      open: true,
-      required: false,
-    });
-    setQuestions(addMoreQuestions);
-  };
-
   const deleteQuestion = (i) => {
     const updatedQuestions = questions.map((question, index) =>
       index === i ? { ...question, options: [] } : question
     );
     setQuestions(updatedQuestions);
-  };
-  const requiredQuestion = (i) => {
-    const requiredQuestions = [...questions];
-    requiredQuestions[i].required = !requiredQuestions[i].required;
-    setQuestions(requiredQuestions);
   };
 
   const saveQuestions = () => {
@@ -93,6 +86,9 @@ function QuestionForm() {
       console.error("No questions to save.");
       return;
     }
+
+    // Display loading animation
+    setLoading(true);
 
     const saveQuestionsData = {
       categoryId: categoryId,
@@ -116,16 +112,25 @@ function QuestionForm() {
           value: option.optionText,
         }));
       } else {
+        // Hide loading animation
+        setLoading(false);
+
         console.error("Dropdown question should have options.");
         return;
       }
     }
 
     if (!saveQuestionsData.title) {
+      // Hide loading animation
+      setLoading(false);
+
       console.error("Question is required.");
       return;
     }
     if (!saveQuestionsData.type) {
+      // Hide loading animation
+      setLoading(false);
+
       console.error("Type is required.");
       return;
     }
@@ -144,9 +149,13 @@ function QuestionForm() {
         ));
 
     if (!hasAnswers) {
+      // Hide loading animation
+      setLoading(false);
+
       console.error("Please provide answers before saving.");
       return;
     }
+
     fetch("http://localhost:8080/questions/addQuestion", {
       method: "POST",
       headers: {
@@ -156,6 +165,9 @@ function QuestionForm() {
     })
       .then((response) => response.json())
       .then((data) => {
+        // Hide loading animation
+        setLoading(false);
+
         console.log("Questions saved successfully:", data);
 
         setCategoryId(id);
@@ -177,9 +189,18 @@ function QuestionForm() {
         ]);
         setDocumentName("Add Questions");
         setDocumentDesc("Form Description");
+
+        // Show success message using Snackbar
+        setSuccessSnackbarOpen(true);
       })
       .catch((error) => {
+        // Hide loading animation
+        setLoading(false);
+
         console.error("Error saving questions:", error);
+
+        // Handle the error and show an error message
+        alert("Error saving questions. Please try again.");
       });
   };
 
@@ -208,6 +229,7 @@ function QuestionForm() {
               style={{ width: "300px" }}
             />
           </div>
+
           <div>
             <Select
               label="Question Type"
@@ -263,23 +285,49 @@ function QuestionForm() {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <h3>Add Questions</h3>
+    <>
+      <div className="container mt-4">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <h3>Add Questions</h3>
+            {/* Loading animation */}
+            {loading && <CircularProgress style={{ marginTop: "20px" }} />}
+          </div>
         </div>
-      </div>
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          {questionUI()}
-          <div className="d-grid gap-2">
-            <Button variant="contained" color="primary" onClick={saveQuestions}>
-              Save
-            </Button>
+
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            {questionUI()}
+            <div className="d-grid gap-2">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={saveQuestions}
+              >
+                Save
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSuccessSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="success"
+          onClose={handleSuccessSnackbarClose}
+        >
+          Question added successfully
+        </MuiAlert>
+      </Snackbar>
+    </>
   );
 }
 
