@@ -213,7 +213,7 @@ function QuestionForm() {
               value={ques.questionType}
               onChange={(e) => changeQuestionType(e.target.value, i)}
               style={{
-                marginLeft: "200px",
+                marginLeft: "00px",
                 marginBottom: "20px",
                 marginTop: "10px",
               }}
