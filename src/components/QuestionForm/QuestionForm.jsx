@@ -228,18 +228,13 @@ function QuestionForm() {
               />
             </div>
           )}
-          <IconButton onClick={() => addOption(i)}>
-            <AddCircleOutlineIcon />
-          </IconButton>
+          {ques.questionType === "dropdown" && (
+            <IconButton onClick={() => addOption(i)}>
+              <AddCircleOutlineIcon />
+            </IconButton>
+          )}
         </AccordionDetails>
         <div className="m-lg-2">
-          {/*<Button
-            onClick={() => addMoreQuestionField(i)}
-            variant="contained"
-            color="primary"
-          >
-            Add Question
-          </Button>*/}
           <IconButton onClick={() => deleteQuestion(i)}>
             <DeleteOutlineIcon />
           </IconButton>

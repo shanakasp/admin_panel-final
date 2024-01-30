@@ -31,6 +31,7 @@ function PreviewCategory() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null); // Added state for the selected image file
   const [errorMessage, setErrorMessage] = useState("");
+  const [showError, setShowError] = useState(false);
   const uploadImageToFirebase = async (selectedFile) => {
     const storageRef = storage.ref();
     const imageRef = storageRef.child(`images/${selectedFile.name}`);
@@ -137,7 +138,33 @@ function PreviewCategory() {
 
   const handleImageChange = (e) => {
     // Update the selected image file when the user selects a new image
-    setSelectedImageFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      // Check if the file type is allowed
+      const allowedTypes = [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".tiff",
+        ".eps",
+        ".raw",
+      ];
+      const fileType = selectedFile.name.substring(
+        selectedFile.name.lastIndexOf(".")
+      );
+
+      if (!allowedTypes.includes(fileType.toLowerCase())) {
+        setErrorMessage(
+          "Only image files are allowed (jpg, jpeg, png, gif, tiff, eps, raw)"
+        );
+        return;
+      }
+
+      // Update the selected image file when the user selects a new image
+      setSelectedImageFile(selectedFile);
+      setErrorMessage(""); // Clear error message when a valid file is selected
+    }
   };
 
   return (
@@ -197,6 +224,12 @@ function PreviewCategory() {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Edit Category</DialogTitle>
+        {/* Display error message */}
+        {showError && (
+          <div style={{ color: "red", marginBottom: "10px" }}>
+            {errorMessage}
+          </div>
+        )}
         <DialogContent>
           {/* Display current name */}
           <div style={{ marginBottom: "10px" }}>

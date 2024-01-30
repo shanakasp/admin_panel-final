@@ -15,9 +15,10 @@ const FormPreview = () => {
         <div className="form_header_left">
           <Sidebar />
           <img
-            src=".././images/body.jpg"
+            src=".././images/medical.png"
             alt=""
-            className="form_header_image"
+            className="header_logo"
+            width={"150px"}
           />
         </div>
       </div>

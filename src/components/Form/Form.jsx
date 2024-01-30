@@ -16,9 +16,10 @@ const Form = () => {
         <div className="form_header_left">
           <Sidebar />
           <img
-            src=".././images/body.jpg"
+            src=".././images/medical.png"
             alt=""
-            className="form_header_image"
+            className="header_logo"
+            width={"150px"}
           />
 
           {/* <input type="text" placeholder="Untitled Form" className="form_name" /> */}
@@ -28,7 +29,7 @@ const Form = () => {
       <div>
         <Centeredtabs paramId={params.id} />
         <motion.div
-          animate={{ opacity: 1 }}
+          animate={{ opacity: 3 }}
           initial={{ opacity: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
