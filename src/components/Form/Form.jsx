@@ -1,14 +1,35 @@
 import { motion } from "framer-motion";
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import QuestionForm from "../QuestionForm/QuestionForm";
 import Sidebar from "../Sidebar/Sidebar";
 import Centeredtabs from "../Tabs/Tabs";
 import "./Form.css";
 
 const Form = () => {
-  const params = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams();
+  const [categoryData, setCategoryData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/category/getCategoryByID/${id}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch data. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched data:", data);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   return (
     <>
@@ -21,13 +42,12 @@ const Form = () => {
             className="header_logo"
             width={"150px"}
           />
-
-          {/* <input type="text" placeholder="Untitled Form" className="form_name" /> */}
         </div>
-        <div className="form_header_right"></div>
+        <div className="form_header_right"> </div>
       </div>
       <div>
-        <Centeredtabs paramId={params.id} />
+        <Centeredtabs paramId={id} />
+        <div className="catmainname">{id}</div>
         <motion.div
           animate={{ opacity: 3 }}
           initial={{ opacity: 0 }}
@@ -35,7 +55,7 @@ const Form = () => {
           transition={{ duration: 0.6 }}
           className="form_bottom"
         >
-          <QuestionForm paramId={params.id} />
+          <QuestionForm paramId={id} />
         </motion.div>
       </div>
     </>

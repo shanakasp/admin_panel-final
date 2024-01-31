@@ -6,18 +6,17 @@ import "./Tabs.css";
 const Centeredtabs = (props) => {
   const navigate = useNavigate();
   return (
-    <Paper className="root">
-      <Tabs
-        className="tabs"
-        label="Questions"
-        indicatorColor="primary"
-        textColor="primary"
-        centered
-      >
+    <Paper className="root" elevation={3} square>
+      <Tabs className="tabs" label="Questions" textColor="primary" centered>
         <Tab
           className="tab"
           label="Questions"
-          style={{ fontSize: "20px" }}
+          style={{
+            fontSize: "15px",
+            borderRadius: "5px",
+            marginRight: "40px",
+            boxShadow: "0 2px 5px ", // Add box shadow
+          }}
           onClick={() => {
             navigate(`/form/${props.paramId}`);
           }}
@@ -25,7 +24,11 @@ const Centeredtabs = (props) => {
         <Tab
           className="tab"
           label="Preview"
-          style={{ fontSize: "20px" }}
+          style={{
+            fontSize: "15px",
+            borderRadius: "5px",
+            boxShadow: "0 2px 5px ", // Add box shadow
+          }}
           onClick={() => {
             navigate(`/preview/${props.paramId}`);
           }}
