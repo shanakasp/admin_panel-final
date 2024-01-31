@@ -203,6 +203,15 @@ function PreviewCategory() {
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
   };
+  const TruncatedButton = ({ category }) => {
+    const MAX_CHARACTERS = 20;
+
+    // Truncate the category name if it exceeds the character limit
+    const truncatedCategory =
+      category.category_name.length > MAX_CHARACTERS
+        ? category.category_name.substring(0, MAX_CHARACTERS - 3) + "..."
+        : category.category_name;
+  };
 
   return (
     <div>
@@ -257,12 +266,15 @@ function PreviewCategory() {
                         }`,
                         marginTop: "10px",
                         transition: "color 0.3s ease-in-out",
-                        width: "100%",
+                        width: "250px",
                         textTransform: "none",
-                        whiteSpace: "pre-line", // Allows for line breaks
+                        whiteSpace: "pre-line",
+                        // Allows for line breaks
                       }}
                     >
-                      {category.category_name}
+                      <div className="categoryname1">
+                        {category.category_name}
+                      </div>
                     </Button>
                   </Link>
 
