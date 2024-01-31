@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   TextField,
   Typography,
@@ -23,6 +24,7 @@ function Profile() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChangePassword = () => {
     // Clear previous error messages
@@ -48,6 +50,19 @@ function Profile() {
       return;
     }
 
+    // Compare the entered old password with the locally stored password
+    const storedPassword = localStorage.getItem("password");
+
+    if (oldPassword !== storedPassword) {
+      setErrorMessages({
+        oldPassword: "Entered old password is incorrect",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      return;
+    }
+
+    // Check if the new password and confirm password values are equal
     if (newPassword !== confirmPassword) {
       setErrorMessages({
         newPassword: "New passwords do not match with Confirm Password",
@@ -56,7 +71,10 @@ function Profile() {
       return;
     }
 
-    // Rest of the code remains unchanged
+    // Set loading to true
+    setLoading(true);
+
+    // Continue with the password change process
     const requestBody = {
       oldPassword,
       newPassword,
@@ -92,6 +110,10 @@ function Profile() {
           newPassword: "",
           confirmPassword: "",
         });
+      })
+      .finally(() => {
+        // Set loading back to false after completion
+        setLoading(false);
       });
   };
 
@@ -163,11 +185,17 @@ function Profile() {
             <Button
               variant="contained"
               color="primary"
+              sx={{ marginTop: 2 }}
               onClick={() => {
                 handleChangePassword();
               }}
+              disabled={loading} // Disable the button when loading is true
             >
-              Change Password
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Change Password"
+              )}
             </Button>
 
             {message && (

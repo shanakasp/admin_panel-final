@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Container,
   CssBaseline,
   TextField,
@@ -23,6 +24,7 @@ const AddCategory = () => {
   const [imageError, setImageError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleAddCategory = async () => {
     setNotification(null);
@@ -39,6 +41,8 @@ const AddCategory = () => {
       setImageError("Please upload an image for the category.");
       return;
     }
+
+    setLoading(true);
 
     const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
 
@@ -82,6 +86,8 @@ const AddCategory = () => {
       setCategoryName("");
       setImageUpload(null);
       setImagePreview(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,7 +198,7 @@ const AddCategory = () => {
                   alt="Preview"
                   style={{
                     maxWidth: "100%",
-                    marginTop: "10px",
+                    marginTop: "20px",
                     marginBottom: "20px",
                   }}
                 />
@@ -204,10 +210,14 @@ const AddCategory = () => {
                 onClick={handleAddCategory}
                 style={{
                   marginBottom: "10px",
-                  marginTop: "25px",
+                  marginTop: "20px",
                 }}
               >
-                Add Category
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : (
+                  "Add Category"
+                )}
               </Button>
             </Box>
           </Box>

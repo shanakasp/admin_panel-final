@@ -1,5 +1,5 @@
 import { Email, Lock } from "@mui/icons-material";
-import { Snackbar } from "@mui/material";
+import { CircularProgress, Snackbar } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -18,19 +18,26 @@ const Login = () => {
   });
   const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
+      setLoading(true); // Set loading state to true during login
+
       const response = await axios.post(
-        "http://3.143.231.155:3006/admin/login",
+        "http://localhost:8080/admin/login",
         values
       );
 
       if (response.data.status) {
         localStorage.setItem("token", response.data.token);
+
+        // Store username and password in localStorage
+        localStorage.setItem("username", values.username);
+        localStorage.setItem("password", values.password);
 
         setOpenSnackbar(true); // Open the success snackbar
         setTimeout(() => {
@@ -43,6 +50,8 @@ const Login = () => {
     } catch (err) {
       console.error(err);
       setError("An error occurred during login");
+    } finally {
+      setLoading(false); // Set loading state back to false after login attempt
     }
   };
 
@@ -106,12 +115,17 @@ const Login = () => {
             {error && <strong>{error}</strong>}
           </div>
           <div className="text-center">
-            <button
-              type="submit"
-              className="btn btn-primary w-50 rounded-15 mb-2"
-            >
-              Log in
-            </button>
+            {/* Conditionally render the button or CircularProgress */}
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : (
+              <button
+                type="submit"
+                className="btn btn-primary w-50 rounded-15 mb-2"
+              >
+                Log in
+              </button>
+            )}
           </div>
         </form>
       </div>

@@ -19,17 +19,20 @@ import axios from "axios";
 import { MDBTable, MDBTableBody, MDBTableHead } from "mdb-react-ui-kit";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
 function Question() {
   const [allQuestions, setAllQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [questionsPerPage] = useState(10); // Adjust as needed
+  const [questionsPerPage] = useState(10);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [loadingMap, setLoadingMap] = useState({}); // Map to store loading state for each question
+  const [loadingMap, setLoadingMap] = useState({});
   const [notification, setNotification] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [questionIdToDelete, setQuestionIdToDelete] = useState(null);
   const getParam = useParams();
 
   useEffect(() => {
@@ -47,14 +50,13 @@ function Question() {
       });
   }, []);
 
-  // Get current questions
-  const indexOfLastQuestion = currentPage * questionsPerPage;
-  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
   const currentQuestions = allQuestions
     .filter((question) => question.category_id == getParam.id)
-    .slice(indexOfFirstQuestion, indexOfLastQuestion);
+    .slice(
+      (currentPage - 1) * questionsPerPage,
+      currentPage * questionsPerPage
+    );
 
-  // Change page
   const handleChangePage = (event, newPage) => {
     setCurrentPage(newPage);
   };
@@ -68,59 +70,67 @@ function Question() {
   };
 
   const handleDelete = (questionId) => {
-    // Set loading state for the specific question to true
+    setConfirmDelete(true);
+    setQuestionIdToDelete(questionId);
+  };
+
+  const handleDeleteConfirmed = () => {
     setLoadingMap((prevLoadingMap) => ({
       ...prevLoadingMap,
-      [questionId]: true,
+      [questionIdToDelete]: true,
     }));
 
     axios
       .delete(`http://localhost:8080/questions/deleteQuestion`, {
-        data: { questionId: [questionId] },
+        data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 
         setTimeout(() => {
           const updatedQuestions = allQuestions.filter(
-            (question) => question.id !== questionId
+            (question) => question.id !== questionIdToDelete
           );
           setAllQuestions(updatedQuestions);
 
-          if (selectedQuestion && selectedQuestion.id === questionId) {
+          if (selectedQuestion && selectedQuestion.id === questionIdToDelete) {
             setSelectedQuestion(null);
           }
 
-          // Show success notification
           setNotification({
             open: true,
             message: "Deleted successfully",
             severity: "success",
           });
 
-          // Reset loading state for the specific question
           setLoadingMap((prevLoadingMap) => ({
             ...prevLoadingMap,
-            [questionId]: false,
+            [questionIdToDelete]: false,
           }));
         }, 2000);
       })
       .catch((error) => {
         console.error("Error deleting:", error);
 
-        // Show error notification
         setNotification({
           open: true,
           message: "Error deleting",
           severity: "error",
         });
 
-        // Reset loading state for the specific question
         setLoadingMap((prevLoadingMap) => ({
           ...prevLoadingMap,
-          [questionId]: false,
+          [questionIdToDelete]: false,
         }));
       });
+
+    setConfirmDelete(false);
+    setQuestionIdToDelete(null);
+  };
+
+  const handleDeleteCanceled = () => {
+    setConfirmDelete(false);
+    setQuestionIdToDelete(null);
   };
 
   return (
@@ -204,7 +214,7 @@ function Question() {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          maxWidth: "10ch", // Set your character limit here
+                          maxWidth: "10ch",
                         }}
                       >
                         {question.type.charAt(0).toUpperCase() +
@@ -221,7 +231,7 @@ function Question() {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          maxWidth: "10ch", // Set your character limit here
+                          maxWidth: "10ch",
                         }}
                       >
                         {question.values.map((value) => value.value).join(", ")}
@@ -239,7 +249,7 @@ function Question() {
                         color="error"
                         size="small"
                         onClick={() => handleDelete(question.id)}
-                        disabled={loadingMap[question.id]} // Disable the button when loading
+                        disabled={loadingMap[question.id]}
                       >
                         {loadingMap[question.id] ? (
                           <CircularProgress size={20} color="inherit" />
@@ -271,7 +281,6 @@ function Question() {
         </Paper>
       </Grid>
 
-      {/* Details Modal */}
       <Modal
         open={!!selectedQuestion}
         onClose={handleCloseDetails}
@@ -310,16 +319,62 @@ function Question() {
           <CardActions>
             <Button
               onClick={handleCloseDetails}
+              variant="contained"
               color="primary"
               style={{
-                backgroundColor: "#1367F9",
-                color: "#fff",
                 borderRadius: "5px",
                 marginLeft: "5px",
-                fontSize: "12px", // Adjust the font size as needed
+                fontSize: "12px",
               }}
             >
               Close
+            </Button>
+          </CardActions>
+        </Card>
+      </Modal>
+
+      {/* Confirmation Dialog */}
+      <Modal
+        open={confirmDelete}
+        onClose={handleDeleteCanceled}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Card style={{ minWidth: 300, maxWidth: 600 }}>
+          <CardContent>
+            <Typography variant="h6" style={{ color: "#041083" }}>
+              Are you sure you want to delete this question?
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button
+              onClick={handleDeleteConfirmed}
+              variant="contained"
+              color="primary"
+              style={{
+                backgroundColor: "#FF616D",
+                color: "#fff",
+                borderRadius: "5px",
+                marginLeft: "5px",
+                fontSize: "12px",
+              }}
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={handleDeleteCanceled}
+              variant="contained"
+              color="primary"
+              style={{
+                borderRadius: "5px",
+                marginLeft: "5px",
+                fontSize: "12px",
+              }}
+            >
+              Cancel
             </Button>
           </CardActions>
         </Card>
