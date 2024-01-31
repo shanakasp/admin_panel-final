@@ -1,4 +1,7 @@
 import { Delete, Edit } from "@mui/icons-material";
+// Import DeleteIcon from @mui
+import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
   Button,
@@ -22,6 +25,7 @@ import { v4 } from "uuid";
 import { storage } from "../AddCategory/Firebaseconfig";
 import Header from "../Header/Header";
 import "./previewstyles.css";
+
 function PreviewCategory() {
   const [notificationTimeout, setNotificationTimeout] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -40,6 +44,7 @@ function PreviewCategory() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdateSuccessful, setIsUpdateSuccessful] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteSuccessful, setIsDeleteSuccessful] = useState(false);
 
   const MAX_CHARACTERS = 50;
 
@@ -210,7 +215,7 @@ function PreviewCategory() {
   };
 
   const handleConfirmDelete = async () => {
-    setIsDeleting(true); // Set loading state to true
+    setIsDeleting(true);
 
     try {
       await fetch(
@@ -220,7 +225,6 @@ function PreviewCategory() {
         }
       );
 
-      // Fetch updated data from the server
       const response = await fetch(
         "http://localhost:8080/category/getAllCategories"
       );
@@ -231,10 +235,13 @@ function PreviewCategory() {
       setEditCategoryName(null);
       setEditImageUrl(null);
       setSelectedImageFile(null);
+
+      // Set isDeleteSuccessful to true after successful delete
+      setIsDeleteSuccessful(true);
     } catch (error) {
       console.error("Error deleting category:", error);
     } finally {
-      setIsDeleting(false); // Set loading state back to false
+      setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
   };
@@ -242,6 +249,7 @@ function PreviewCategory() {
   const handleCancelDelete = () => {
     setIsDeleteDialogOpen(false);
   };
+
   const TruncatedButton = ({ category }) => {
     const MAX_CHARACTERS = 20;
 
@@ -444,7 +452,7 @@ function PreviewCategory() {
         </DialogContent>
       </Dialog>
 
-      <div className="delete">
+      <div>
         {/* Delete Confirmation Dialog */}
         <Dialog
           open={isDeleteDialogOpen}
@@ -463,28 +471,47 @@ function PreviewCategory() {
                 fontSize: "17px",
                 color: "black",
                 maxWidth: "none", // Allow content to spread along width
-                margin: 0, // Remove margin
+                marginRight: "10px", // Remove margin
               }}
             >
               Are you sure you want to delete this category? <br></br> This will
               remove category and relevant questions too.
             </DialogContentText>
-            <DialogActions className="buttons">
+            <DialogActions
+              className="buttons"
+              style={{ justifyContent: "flex-end" }}
+            >
               <Button
                 onClick={handleCancelDelete}
-                color="secondary"
-                style={{ border: "1px solid #000" }}
+                style={{
+                  padding: "5px",
+                  borderRadius: "4px",
+                  minWidth: "120px",
+                  border: "1px solid #add8e6", // Light blue border
+                  marginRight: "5px", // Gap of 5px
+                }}
+                startIcon={<CancelIcon />} // Add CancelIcon as a start icon
               >
                 Cancel
               </Button>
 
+              {/* Delete Button */}
               <Button
                 onClick={handleConfirmDelete}
-                color="secondary"
-                disabled={isDeleting} // Disable the button while deleting
-                style={{ border: "1px solid #000", position: "relative" }}
+                disabled={isDeleting}
+                style={{
+                  padding: "5px",
+                  borderRadius: "4px",
+                  minWidth: "120px",
+                  border: "1px solid #add8e6", // Light blue border
+                }}
+                endIcon={
+                  <DeleteIcon
+                    style={{ fontSize: "1.5rem", marginLeft: "5px" }}
+                  />
+                } // Increase icon size
               >
-                Confirm Delete
+                Delete
                 {isDeleting && (
                   <CircularProgress
                     size={24}
@@ -514,6 +541,22 @@ function PreviewCategory() {
             onClose={setIsUpdateSuccessful}
           >
             Updated successfully
+          </MuiAlert>
+        </Snackbar>
+        {/* Snackbar for Successful Delete */}
+        <Snackbar
+          open={isDeleteSuccessful}
+          autoHideDuration={3000}
+          onClose={() => setIsDeleteSuccessful(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            elevation={6}
+            variant="filled"
+            severity="success"
+            onClose={() => setIsDeleteSuccessful(false)}
+          >
+            Category deleted successfully
           </MuiAlert>
         </Snackbar>
       </div>
