@@ -4,14 +4,17 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   IconButton,
+  Snackbar,
   TextField,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -19,7 +22,6 @@ import { v4 } from "uuid";
 import { storage } from "../AddCategory/Firebaseconfig";
 import Header from "../Header/Header";
 import "./previewstyles.css";
-
 function PreviewCategory() {
   const [notificationTimeout, setNotificationTimeout] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -35,6 +37,9 @@ function PreviewCategory() {
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showError, setShowError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUpdateSuccessful, setIsUpdateSuccessful] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const MAX_CHARACTERS = 50;
 
@@ -58,6 +63,7 @@ function PreviewCategory() {
     setIsEditDialogOpen(false);
     setNotification(null); // Clear any existing notifications
     clearNotificationTimeout();
+    setEditImageUrl(null);
   };
 
   const clearNotificationTimeout = () => {
@@ -83,10 +89,26 @@ function PreviewCategory() {
     setEditCategoryName(categoryName);
     setEditImageUrl(imageUrl);
     setIsEditDialogOpen(true);
+    setShowError(false);
   };
 
   const handleEditSave = async () => {
     try {
+      setIsSaving(true);
+
+      // Check if any changes have been made
+      if (
+        editCategoryName.trim() ===
+          categories
+            .find((c) => c.category_id === editCategoryId)
+            .category_name.trim() &&
+        !selectedImageFile
+      ) {
+        setErrorMessage("Nothing has changed");
+        setShowError(true);
+        return;
+      }
+
       let requestBody = {};
 
       // Validate category name
@@ -107,6 +129,7 @@ function PreviewCategory() {
 
       if (!editCategoryName.trim()) {
         setErrorMessage("Category name cannot be empty");
+        setShowError(true);
         return;
       }
 
@@ -129,6 +152,12 @@ function PreviewCategory() {
       const data = await response.json();
       setCategories(data.result.data);
 
+      // Show success notification
+      setIsUpdateSuccessful(true);
+      setTimeout(() => {
+        setIsUpdateSuccessful(false);
+      }, 3000);
+
       // Reset values to null
       setEditCategoryName(null);
       setEditImageUrl(null);
@@ -138,6 +167,8 @@ function PreviewCategory() {
     } catch (error) {
       console.error("Error updating category:", error);
       // Handle error as needed, e.g., set an error notification
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -163,12 +194,14 @@ function PreviewCategory() {
         setErrorMessage(
           "Only image files are allowed (jpg, jpeg, png, gif, tiff, eps, raw)"
         );
+        setShowError(true);
         return;
       }
 
       // Update the selected image file when the user selects a new image
       setSelectedImageFile(selectedFile);
       setErrorMessage(""); // Clear error message when a valid file is selected
+      setShowError(false); // Hide the error message when a valid file is selected
     }
   };
   const handleDeleteClick = (categoryId) => {
@@ -176,28 +209,34 @@ function PreviewCategory() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    fetch(
-      `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
-      {
-        method: "DELETE",
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Category deleted successfully:", data);
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true); // Set loading state to true
 
-        fetch("http://localhost:8080/category/getAllCategories")
-          .then((response) => response.json())
-          .then((data) => setCategories(data.result.data))
-          .catch((error) => console.error("Error fetching data:", error));
-      })
-      .catch((error) => {
-        console.error("Error deleting category:", error);
-      })
-      .finally(() => {
-        setIsDeleteDialogOpen(false);
-      });
+    try {
+      await fetch(
+        `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      // Fetch updated data from the server
+      const response = await fetch(
+        "http://localhost:8080/category/getAllCategories"
+      );
+      const data = await response.json();
+      setCategories(data.result.data);
+
+      // Reset values to null
+      setEditCategoryName(null);
+      setEditImageUrl(null);
+      setSelectedImageFile(null);
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    } finally {
+      setIsDeleting(false); // Set loading state back to false
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -300,21 +339,10 @@ function PreviewCategory() {
         sx={{
           alignItems: "center",
           textAlign: "center", // Center the content
-          width: "440px", // Set a maximum width for the dialog
+          width: "100%", // Set a maximum width for the dialog
           margin: "auto", // Center the dialog horizontally
         }}
       >
-        {notification && (
-          <Alert
-            severity={notification.type ? notification.type : "info"}
-            onClose={() => {
-              setNotification(null);
-              clearNotificationTimeout();
-            }}
-          >
-            {notification.message}
-          </Alert>
-        )}
         <DialogTitle id="form-dialog-title">Edit Category</DialogTitle>
         <DialogContent>
           {/* Display current name */}
@@ -345,11 +373,23 @@ function PreviewCategory() {
             value={editCategoryName}
             onChange={(e) => setEditCategoryName(e.target.value)}
           />
-
+          {/* Display error message */}
+          {showError && (
+            <Alert
+              severity="error"
+              onClose={() => {
+                setShowError(false);
+              }}
+              sx={{ margin: 2 }}
+            >
+              {errorMessage}
+            </Alert>
+          )}
           {/* Display current image preview */}
           {editImageUrl && (
             <div className="current_image_headline">
               <strong>Current Image Preview:</strong>
+              <br></br>
               <img
                 src={editImageUrl}
                 alt="Current Preview"
@@ -372,14 +412,34 @@ function PreviewCategory() {
                 onChange={handleImageChange} // Handle the file change event
               />
             </div>
-            <DialogContent className="bottom_button">
-              <Button onClick={handleEditDialogClose} color="primary">
+            <div
+              className="twobuttons"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={handleEditDialogClose}
+                color="primary"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleEditSave} color="primary">
-                Save
+
+              <Button
+                variant="contained"
+                onClick={handleEditSave}
+                color="primary"
+              >
+                {isSaving ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Save"
+                )}
               </Button>
-            </DialogContent>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -417,16 +477,45 @@ function PreviewCategory() {
               >
                 Cancel
               </Button>
+
               <Button
                 onClick={handleConfirmDelete}
                 color="secondary"
-                style={{ border: "1px solid #000" }}
+                disabled={isDeleting} // Disable the button while deleting
+                style={{ border: "1px solid #000", position: "relative" }}
               >
                 Confirm Delete
+                {isDeleting && (
+                  <CircularProgress
+                    size={24}
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      marginTop: -12,
+                      marginLeft: -12,
+                    }}
+                  />
+                )}
               </Button>
             </DialogActions>
           </DialogContent>
         </Dialog>
+        <Snackbar
+          open={isUpdateSuccessful}
+          autoHideDuration={3000}
+          onClose={() => setIsUpdateSuccessful(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <MuiAlert
+            elevation={6}
+            variant="filled"
+            severity="success"
+            onClose={setIsUpdateSuccessful}
+          >
+            Updated successfully
+          </MuiAlert>
+        </Snackbar>
       </div>
     </div>
   );

@@ -87,15 +87,11 @@ body {
 }
 
 .new_image_select {
-  margin: 10px;
+  margin-top: 20px;
 }
 
 .current_image_headline {
   margin: 10px;
-}
-
-.bottom_button {
-  text-align: right;
 }
 
 /* ../path-to-your-styles.css */
@@ -123,4 +119,13 @@ body {
     color: rgb(255, 255, 255); /* Change font color on hover */
     white-space: initial; /* Show full text on hover */
   }
+}
+
+.new_image {
+  margin-top: 20px;
+}
+
+.twobuttons {
+  margin-top: 25px;
+  align-items: right;
 }

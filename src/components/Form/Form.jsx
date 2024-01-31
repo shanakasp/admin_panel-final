@@ -47,7 +47,7 @@ const Form = () => {
       </div>
       <div>
         <Centeredtabs paramId={id} />
-        <div className="catmainname">{id}</div>
+
         <motion.div
           animate={{ opacity: 3 }}
           initial={{ opacity: 0 }}
