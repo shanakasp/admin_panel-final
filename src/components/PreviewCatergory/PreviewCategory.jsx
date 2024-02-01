@@ -245,7 +245,7 @@ function PreviewCategory() {
         setIsDeleting(false);
         setIsDeleteDialogOpen(false);
       }
-    }, 1000); // 1000 milliseconds = 1 second
+    }, 500); // 1000 milliseconds = 1 second
   };
 
   const handleCancelDelete = () => {
