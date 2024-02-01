@@ -37,7 +37,7 @@ function Question() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/questions/getAllQuestions")
+      .get("http://3.143.231.155:3006/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           setAllQuestions(response.data.result.questions);
@@ -81,7 +81,7 @@ function Question() {
     }));
 
     axios
-      .delete(`http://localhost:8080/questions/deleteQuestion`, {
+      .delete(`http://3.143.231.155:3006/questions/deleteQuestion`, {
         data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {
