@@ -215,35 +215,37 @@ function PreviewCategory() {
   };
 
   const handleConfirmDelete = async () => {
+    // Show loading circle for 1 second before starting deletion
     setIsDeleting(true);
+    setTimeout(async () => {
+      try {
+        await fetch(
+          `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
+          {
+            method: "DELETE",
+          }
+        );
 
-    try {
-      await fetch(
-        `http://localhost:8080/category/deleteCategoryByID/${deleteCategoryId}`,
-        {
-          method: "DELETE",
-        }
-      );
+        const response = await fetch(
+          "http://localhost:8080/category/getAllCategories"
+        );
+        const data = await response.json();
+        setCategories(data.result.data);
 
-      const response = await fetch(
-        "http://localhost:8080/category/getAllCategories"
-      );
-      const data = await response.json();
-      setCategories(data.result.data);
+        // Reset values to null
+        setEditCategoryName(null);
+        setEditImageUrl(null);
+        setSelectedImageFile(null);
 
-      // Reset values to null
-      setEditCategoryName(null);
-      setEditImageUrl(null);
-      setSelectedImageFile(null);
-
-      // Set isDeleteSuccessful to true after successful delete
-      setIsDeleteSuccessful(true);
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
+        // Set isDeleteSuccessful to true after successful delete
+        setIsDeleteSuccessful(true);
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      } finally {
+        setIsDeleting(false);
+        setIsDeleteDialogOpen(false);
+      }
+    }, 1000); // 1000 milliseconds = 1 second
   };
 
   const handleCancelDelete = () => {
@@ -521,6 +523,7 @@ function PreviewCategory() {
                       left: "50%",
                       marginTop: -12,
                       marginLeft: -12,
+                      color: "#0000FF", // Hex code for blue
                     }}
                   />
                 )}

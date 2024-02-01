@@ -107,7 +107,7 @@ function Question() {
             ...prevLoadingMap,
             [questionIdToDelete]: false,
           }));
-        }, 2000);
+        }, 500);
       })
       .catch((error) => {
         console.error("Error deleting:", error);

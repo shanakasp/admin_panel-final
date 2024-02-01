@@ -26,7 +26,25 @@ function Profile() {
   });
   const [loading, setLoading] = useState(false);
 
+  // Function to validate password strength
+  const isStrongPassword = (password) => {
+    // Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
   const handleChangePassword = () => {
+    // Validate new password strength
+    if (!isStrongPassword(newPassword)) {
+      setErrorMessages({
+        newPassword:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol.",
+        confirmPassword: "",
+      });
+      return;
+    }
+
     // Clear previous error messages
     setErrorMessages({
       oldPassword: "",
@@ -65,7 +83,7 @@ function Profile() {
     // Check if the new password and confirm password values are equal
     if (newPassword !== confirmPassword) {
       setErrorMessages({
-        newPassword: "New passwords do not match with Confirm Password",
+        // newPassword: "New passwords do not match with Confirm Password",
         confirmPassword: "Confirm passwords do not match with New Password",
       });
       return;

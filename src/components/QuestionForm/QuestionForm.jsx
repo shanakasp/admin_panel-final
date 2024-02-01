@@ -39,6 +39,20 @@ function QuestionForm() {
 
   const [loading, setLoading] = useState(false);
   const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
+  // New state variables for error handling
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Function to handle error Snackbar close
+  const handleErrorSnackbarClose = () => {
+    setErrorSnackbarOpen(false);
+  };
+
+  // Function to set and show error message in Snackbar
+  const showErrorSnackbar = (message) => {
+    setErrorMessage(message);
+    setErrorSnackbarOpen(true);
+  };
 
   const handleSuccessSnackbarClose = () => {
     setSuccessSnackbarOpen(false);
@@ -125,6 +139,7 @@ function QuestionForm() {
       setLoading(false);
 
       console.error("Question is required.");
+      showErrorSnackbar("Question is required.");
       return;
     }
     if (!saveQuestionsData.type) {
@@ -153,6 +168,8 @@ function QuestionForm() {
       setLoading(false);
 
       console.error("Please provide answers before saving.");
+      showErrorSnackbar("Please provide answers before saving.");
+      setLoading(false);
       return;
     }
 
@@ -325,6 +342,22 @@ function QuestionForm() {
           onClose={handleSuccessSnackbarClose}
         >
           Question added successfully
+        </MuiAlert>
+      </Snackbar>
+
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleErrorSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="error"
+          onClose={handleErrorSnackbarClose}
+        >
+          {errorMessage}
         </MuiAlert>
       </Snackbar>
     </>
