@@ -12,6 +12,7 @@ import AddCategory from "./components/AddCategory/AddCategory";
 import PreviewCategory from "./components/PreviewCatergory/PreviewCategory";
 import Profile from "./components/Profile/Profile";
 import PrivateRoutes from "./utils/PrivateRoutes";
+
 const App = () => {
   return (
     <>

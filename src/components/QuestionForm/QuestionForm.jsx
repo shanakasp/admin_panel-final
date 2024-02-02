@@ -7,13 +7,14 @@ import {
   Accordion,
   AccordionDetails,
   Button,
-  FormControlLabel,
+  CircularProgress, // Make sure CircularProgress is imported
   IconButton,
   MenuItem,
   Select,
-  Switch,
+  Snackbar,
   TextField,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -35,6 +36,27 @@ function QuestionForm() {
 
   const [documentName, setDocumentName] = useState("Add Questions");
   const [documentDesc, setDocumentDesc] = useState("Form Description");
+
+  const [loading, setLoading] = useState(false);
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
+  // New state variables for error handling
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Function to handle error Snackbar close
+  const handleErrorSnackbarClose = () => {
+    setErrorSnackbarOpen(false);
+  };
+
+  // Function to set and show error message in Snackbar
+  const showErrorSnackbar = (message) => {
+    setErrorMessage(message);
+    setErrorSnackbarOpen(true);
+  };
+
+  const handleSuccessSnackbarClose = () => {
+    setSuccessSnackbarOpen(false);
+  };
 
   const changeQuestion = (text, i) => {
     const newQuestions = [...questions];
@@ -66,28 +88,11 @@ function QuestionForm() {
     }
   };
 
-  const addMoreQuestionField = () => {
-    const addMoreQuestions = [...questions];
-    addMoreQuestions.push({
-      questionText: "",
-      questionType: "dropdown",
-      options: [{ optionText: "a" }],
-      open: true,
-      required: false,
-    });
-    setQuestions(addMoreQuestions);
-  };
-
   const deleteQuestion = (i) => {
     const updatedQuestions = questions.map((question, index) =>
       index === i ? { ...question, options: [] } : question
     );
     setQuestions(updatedQuestions);
-  };
-  const requiredQuestion = (i) => {
-    const requiredQuestions = [...questions];
-    requiredQuestions[i].required = !requiredQuestions[i].required;
-    setQuestions(requiredQuestions);
   };
 
   const saveQuestions = () => {
@@ -95,6 +100,9 @@ function QuestionForm() {
       console.error("No questions to save.");
       return;
     }
+
+    // Display loading animation
+    setLoading(true);
 
     const saveQuestionsData = {
       categoryId: categoryId,
@@ -118,17 +126,54 @@ function QuestionForm() {
           value: option.optionText,
         }));
       } else {
+        // Hide loading animation
+        setLoading(false);
+
         console.error("Dropdown question should have options.");
         return;
       }
     }
 
-    if (!saveQuestionsData.title || !saveQuestionsData.type) {
-      console.error("Title and type are required.");
+    if (!saveQuestionsData.title) {
+      // Hide loading animation
+      setLoading(false);
+
+      console.error("Question is required.");
+      showErrorSnackbar("Question is required.");
+      return;
+    }
+    if (!saveQuestionsData.type) {
+      // Hide loading animation
+      setLoading(false);
+
+      console.error("Type is required.");
+      return;
+    }
+    // Check if there are any answers
+    const hasAnswers =
+      questions.some(
+        (ques) =>
+          ques.questionType === "text" &&
+          ques.answerText !== undefined &&
+          ques.answerText.trim() !== ""
+      ) ||
+      (questions[0].options &&
+        questions[0].options.some(
+          (option) =>
+            option.optionText !== undefined && option.optionText.trim() !== ""
+        ));
+
+    if (!hasAnswers) {
+      // Hide loading animation
+      setLoading(false);
+
+      console.error("Please provide answers before saving.");
+      showErrorSnackbar("Please provide answers before saving.");
+      setLoading(false);
       return;
     }
 
-    fetch("http://localhost:8080/questions/addQuestion", {
+    fetch("http://3.143.231.155:3006/questions/addQuestion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -137,6 +182,9 @@ function QuestionForm() {
     })
       .then((response) => response.json())
       .then((data) => {
+        // Hide loading animation
+        setLoading(false);
+
         console.log("Questions saved successfully:", data);
 
         setCategoryId(id);
@@ -158,9 +206,18 @@ function QuestionForm() {
         ]);
         setDocumentName("Add Questions");
         setDocumentDesc("Form Description");
+
+        // Show success message using Snackbar
+        setSuccessSnackbarOpen(true);
       })
       .catch((error) => {
+        // Hide loading animation
+        setLoading(false);
+
         console.error("Error saving questions:", error);
+
+        // Handle the error and show an error message
+        alert("Error saving questions. Please try again.");
       });
   };
 
@@ -189,13 +246,14 @@ function QuestionForm() {
               style={{ width: "300px" }}
             />
           </div>
+
           <div>
             <Select
               label="Question Type"
               value={ques.questionType}
               onChange={(e) => changeQuestionType(e.target.value, i)}
               style={{
-                marginLeft: "200px",
+                marginLeft: "00px",
                 marginBottom: "20px",
                 marginTop: "10px",
               }}
@@ -228,55 +286,81 @@ function QuestionForm() {
               />
             </div>
           )}
-          <IconButton onClick={() => addOption(i)}>
-            <AddCircleOutlineIcon />
-          </IconButton>
+          {ques.questionType === "dropdown" && (
+            <IconButton onClick={() => addOption(i)}>
+              <AddCircleOutlineIcon />
+            </IconButton>
+          )}
         </AccordionDetails>
         <div className="m-lg-2">
-          {/*<Button
-            onClick={() => addMoreQuestionField(i)}
-            variant="contained"
-            color="primary"
-          >
-            Add Question
-          </Button>*/}
           <IconButton onClick={() => deleteQuestion(i)}>
             <DeleteOutlineIcon />
           </IconButton>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={ques.required}
-                onChange={() => requiredQuestion(i)}
-                name="required"
-                color="primary"
-              />
-            }
-            label="Required"
-          />
         </div>
       </Accordion>
     ));
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <h3>Add Questions</h3>
+    <>
+      <div className="container mt-4">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <h3>Add Questions</h3>
+            {/* Loading animation */}
+            {loading && <CircularProgress style={{ margin: "20px" }} />}
+          </div>
         </div>
-      </div>
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          {questionUI()}
-          <div className="d-grid gap-2">
-            <Button variant="contained" color="primary" onClick={saveQuestions}>
-              Save
-            </Button>
+
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            {questionUI()}
+            <div className="d-grid gap-2">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={saveQuestions}
+              >
+                Save
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSuccessSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="success"
+          onClose={handleSuccessSnackbarClose}
+        >
+          Question added successfully
+        </MuiAlert>
+      </Snackbar>
+
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleErrorSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="error"
+          onClose={handleErrorSnackbarClose}
+        >
+          {errorMessage}
+        </MuiAlert>
+      </Snackbar>
+    </>
   );
 }
 

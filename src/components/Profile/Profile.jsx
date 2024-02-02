@@ -1,4 +1,12 @@
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../Header/Header";
@@ -11,39 +19,86 @@ function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [errorMessages, setErrorMessages] = useState([]);
+  const [errorMessages, setErrorMessages] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Function to validate password strength
+  const isStrongPassword = (password) => {
+    // Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
 
   const handleChangePassword = () => {
+    // Validate new password strength
+    if (!isStrongPassword(newPassword)) {
+      setErrorMessages({
+        newPassword:
+          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol.",
+        confirmPassword: "",
+      });
+      return;
+    }
+
     // Clear previous error messages
-    setErrorMessages([]);
+    setErrorMessages({
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
 
     // Validate inputs
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      setErrorMessages(["All fields must be filled"]);
-      // Reset input fields to null
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      setErrorMessages((prevErrors) => ({
+        oldPassword: !oldPassword.trim()
+          ? "Old password is required"
+          : prevErrors.oldPassword,
+        newPassword: !newPassword.trim()
+          ? "New password is required"
+          : prevErrors.newPassword,
+        confirmPassword: !confirmPassword.trim()
+          ? "Confirm password is required"
+          : prevErrors.confirmPassword,
+      }));
       return;
     }
 
+    // Compare the entered old password with the locally stored password
+    const storedPassword = localStorage.getItem("password");
+
+    if (oldPassword !== storedPassword) {
+      setErrorMessages({
+        oldPassword: "Entered old password is incorrect",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      return;
+    }
+
+    // Check if the new password and confirm password values are equal
     if (newPassword !== confirmPassword) {
-      setErrorMessages(["Entered passwords do not match"]);
-      // Reset input fields to null
-      setNewPassword("");
-      setConfirmPassword("");
-      setOldPassword("");
+      setErrorMessages({
+        // newPassword: "New passwords do not match with Confirm Password",
+        confirmPassword: "Confirm passwords do not match with New Password",
+      });
       return;
     }
 
-    // Create the request payload
+    // Set loading to true
+    setLoading(true);
+
+    // Continue with the password change process
     const requestBody = {
       oldPassword,
       newPassword,
     };
 
-    // Make the API request
-    fetch("http://localhost:8080/admin/changeSuperAdminPassword/1", {
+    fetch("http://3.143.231.155:3006/admin/changeSuperAdminPassword/1", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,19 +114,35 @@ function Profile() {
       })
       .then((data) => {
         setMessage("Password changed successfully!");
-        // Navigate to the home page ("/") after successful password change
-        navigate("/");
+
+        // Wait for 1 second before navigating
+        setTimeout(() => {
+          // Navigate to the home page ("/") after successful password change
+          navigate("/");
+        }, 1500);
       })
       .catch((error) => {
-        setErrorMessages([error.message]);
+        setMessage("Password not changed. " + error.message);
+        setErrorMessages({
+          oldPassword: error.message,
+          newPassword: "",
+          confirmPassword: "",
+        });
+      })
+      .finally(() => {
+        // Set loading back to false after completion
+        setLoading(false);
       });
   };
 
-  // Function to display error messages for 4 seconds
   const displayErrorMessages = () => {
-    setTimeout(() => {
-      setErrorMessages([]);
-    }, 4000);
+    setErrorMessages((prevErrors) => ({
+      oldPassword: !oldPassword.trim() ? prevErrors.oldPassword : "",
+      newPassword: !newPassword.trim() ? prevErrors.newPassword : "",
+      confirmPassword: !confirmPassword.trim()
+        ? prevErrors.confirmPassword
+        : "",
+    }));
   };
 
   return (
@@ -94,42 +165,62 @@ function Profile() {
               label="Old Password"
               type="password"
               value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
+              onChange={(e) => {
+                setOldPassword(e.target.value);
+                displayErrorMessages();
+              }}
               fullWidth
               margin="normal"
+              error={Boolean(errorMessages.oldPassword)}
+              helperText={errorMessages.oldPassword}
             />
             <TextField
               label="New Password"
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                displayErrorMessages();
+              }}
               fullWidth
               margin="normal"
+              error={Boolean(errorMessages.newPassword)}
+              helperText={errorMessages.newPassword}
             />
             <TextField
               label="Confirm Password"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                displayErrorMessages();
+              }}
               fullWidth
               margin="normal"
+              error={Boolean(errorMessages.confirmPassword)}
+              helperText={errorMessages.confirmPassword}
             />
             <Button
               variant="contained"
               color="primary"
+              sx={{ marginTop: 2 }}
               onClick={() => {
                 handleChangePassword();
-                displayErrorMessages();
               }}
+              disabled={loading} // Disable the button when loading is true
             >
-              Change Password
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Change Password"
+              )}
             </Button>
-            {errorMessages.map((error, index) => (
-              <Typography key={index} color="error" mt={2}>
-                {error}
-              </Typography>
-            ))}
-            <Typography mt={2}>{message}</Typography>
+
+            {message && (
+              <Alert severity="success" sx={{ marginTop: 2 }}>
+                {message}
+              </Alert>
+            )}
           </Box>
         </Box>
       </Container>
