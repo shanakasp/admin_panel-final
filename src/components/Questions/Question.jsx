@@ -348,7 +348,7 @@ function QuestionForm() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4">No questions found</td>
+                    <td colSpan="4">No questions found.</td>
                   </tr>
                 )}
               </MDBTableBody>
