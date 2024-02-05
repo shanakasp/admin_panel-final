@@ -172,7 +172,7 @@ function Question() {
                   Input Type
                 </th>
                 <th scope="col" style={{ color: "#041083", width: "30%" }}>
-                  Ans.
+                  Answer(s)
                 </th>
                 <th scope="col" style={{ color: "#041083", width: "5%" }}>
                   Action

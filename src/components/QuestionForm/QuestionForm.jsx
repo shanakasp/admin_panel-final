@@ -130,6 +130,7 @@ function QuestionForm() {
         setLoading(false);
 
         console.error("Dropdown question should have options.");
+        showErrorSnackbar("Dropdown question should have options.");
         return;
       }
     }
@@ -147,8 +148,10 @@ function QuestionForm() {
       setLoading(false);
 
       console.error("Type is required.");
+      showErrorSnackbar("Type is required.");
       return;
     }
+
     // Check if there are any answers
     const hasAnswers =
       questions.some(
@@ -163,13 +166,12 @@ function QuestionForm() {
             option.optionText !== undefined && option.optionText.trim() !== ""
         ));
 
-    if (!hasAnswers) {
+    if (!hasAnswers && saveQuestionsData.type === "dropdown") {
       // Hide loading animation
       setLoading(false);
 
-      console.error("Please provide answers before saving.");
-      showErrorSnackbar("Please provide answers before saving.");
-      setLoading(false);
+      console.error("Answers are mandatory for dropdown questions.");
+      showErrorSnackbar("Answers are mandatory for dropdown questions.");
       return;
     }
 
