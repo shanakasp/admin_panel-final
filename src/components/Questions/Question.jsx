@@ -10,7 +10,8 @@ function Question() {
   const [currentPage, setCurrentPage] = useState(1);
   const [questionsPerPage] = useState(10);
 
-  const [loadingMap, setLoadingMap] = useState({});
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [orderedQuestions, setOrderedQuestions] = useState([]);
 
   const getParam = useParams();
 
@@ -19,7 +20,18 @@ function Question() {
       .get("http://3.143.231.155:3006/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
-          setAllQuestions(response.data.result.questions);
+          const allQuestions = response.data.result.questions;
+          setAllQuestions(allQuestions);
+          setFilteredQuestions(
+            allQuestions.filter(
+              (question) => question.category_id == getParam.id
+            )
+          );
+          setOrderedQuestions(
+            allQuestions.filter(
+              (question) => question.category_id == getParam.id
+            )
+          );
         } else {
           console.error("Invalid response format from server.");
         }
@@ -27,21 +39,65 @@ function Question() {
       .catch((error) => {
         alert(error.message);
       });
-  }, []);
+  }, [getParam.id]);
 
-  const currentQuestions = allQuestions
-    .filter((question) => question.category_id == getParam.id)
-    .slice(
-      (currentPage - 1) * questionsPerPage,
-      currentPage * questionsPerPage
-    );
+  const currentQuestions = orderedQuestions.slice(
+    (currentPage - 1) * questionsPerPage,
+    currentPage * questionsPerPage
+  );
 
-  const handleOrderUp = () => {
-    console.log("Order Up clicked");
+  const handleOrderUp = (index) => {
+    if (index > 0) {
+      setOrderedQuestions((prevOrderedQuestions) => {
+        const updatedQuestions = [...prevOrderedQuestions];
+        const temp = updatedQuestions[index];
+        updatedQuestions[index] = updatedQuestions[index - 1];
+        updatedQuestions[index - 1] = temp;
+        return updatedQuestions;
+      });
+    }
   };
 
-  const handleOrderDown = () => {
-    console.log("Order Down clicked");
+  const handleOrderDown = (index) => {
+    if (index < orderedQuestions.length - 1) {
+      setOrderedQuestions((prevOrderedQuestions) => {
+        const updatedQuestions = [...prevOrderedQuestions];
+        const temp = updatedQuestions[index];
+        updatedQuestions[index] = updatedQuestions[index + 1];
+        updatedQuestions[index + 1] = temp;
+        return updatedQuestions;
+      });
+    }
+  };
+
+  const handleUpdateOrder = () => {
+    const newQuestionsData = orderedQuestions.map((question, index) => ({
+      ...question,
+      order: index + 1,
+    }));
+
+    fetch("http://3.143.231.155:3006/questions/addQuestions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ questions: newQuestionsData }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("New questions added successfully", data);
+      })
+      .catch((error) => {
+        console.error("Error adding new questions:", error.message);
+        alert(
+          "Error adding new questions. Please check server logs for details."
+        );
+      });
   };
 
   return (
@@ -102,15 +158,13 @@ function Question() {
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td>
-                      <td style={{ display: "flex" }}>
-                        <Button onClick={handleOrderUp}>
-                          <ArrowUpward />
-                        </Button>
-                        <Button onClick={handleOrderDown}>
-                          <ArrowDownward />
-                        </Button>
-                      </td>
+                    <td style={{ display: "flex" }}>
+                      <Button onClick={() => handleOrderUp(index)}>
+                        <ArrowUpward />
+                      </Button>
+                      <Button onClick={() => handleOrderDown(index)}>
+                        <ArrowDownward />
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -121,6 +175,19 @@ function Question() {
               )}
             </MDBTableBody>
           </MDBTable>
+          <MDBTableBody>
+            <tr>
+              <td colSpan="5" style={{ textAlign: "right" }}>
+                <Button
+                  variant="contained"
+                  color="warning" // Use the appropriate color for warning
+                  onClick={handleUpdateOrder}
+                >
+                  Update Order
+                </Button>
+              </td>
+            </tr>
+          </MDBTableBody>
         </Paper>
       </Grid>
     </Grid>
