@@ -26,7 +26,6 @@ import { useParams } from "react-router-dom";
 function QuestionForm() {
   const [allQuestions, setAllQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [questionsPerPage] = useState(10);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [loadingMap, setLoadingMap] = useState({});
   const [notification, setNotification] = useState({
@@ -39,6 +38,32 @@ function QuestionForm() {
   const getParam = useParams();
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [orderedQuestions, setOrderedQuestions] = useState([]);
+  const [questionsPerPage, setQuestionsPerPage] = useState(10);
+  const [updateOrderMode, setUpdateOrderMode] = useState(true); // State to track the mode of the button
+  const [showChangeOrderColumn, setShowChangeOrderColumn] = useState(false);
+
+  const handleButtonClick = () => {
+    if (!updateOrderMode) {
+      handleDone();
+    } else {
+      handleUpdateOrder();
+    }
+    // Toggle the mode after each click
+    setUpdateOrderMode(!updateOrderMode);
+  };
+  const handleDone = () => {
+    setQuestionsPerPage(10);
+    // Your logic for handling "Done" goes here
+    console.log("Handle Done");
+  };
+  const handleUpdateOrder = () => {
+    // Your existing logic for handling update order goes here
+    console.log("Handle Update Order");
+    setShowChangeOrderColumn(true);
+    setCurrentPage(1);
+    // Change questionsPerPage to 1000
+    setQuestionsPerPage(100000);
+  };
 
   useEffect(() => {
     axios
@@ -155,10 +180,6 @@ function QuestionForm() {
         return updatedQuestions;
       });
     }
-  };
-
-  const handleUpdateOrder = () => {
-    console.log("Handle Update Order");
   };
 
   const handleChangePage = (event, newPage) => {
@@ -399,10 +420,10 @@ function QuestionForm() {
             <td colSpan="5" style={{ textAlign: "right" }}>
               <Button
                 variant="contained"
-                color="warning" // Use the appropriate color for warning
-                onClick={handleUpdateOrder}
+                color={updateOrderMode ? "warning" : "primary"} // Color changes based on mode
+                onClick={handleButtonClick}
               >
-                Update Order
+                {updateOrderMode ? "Update Order" : "Done"}
               </Button>
             </td>
             <Pagination
