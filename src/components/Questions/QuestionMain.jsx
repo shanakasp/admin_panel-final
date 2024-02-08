@@ -42,7 +42,7 @@ function QuestionForm() {
 
   useEffect(() => {
     axios
-      .get("http://3.143.231.155:3006/questions/getAllQuestions")
+      .get("http://localhost:8080/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           const allQuestions = response.data.result.questions;
@@ -95,29 +95,26 @@ function QuestionForm() {
     }
   };
   const handleUpdateOrder = () => {
-    // Assuming `orderedQuestions` contains the correct order you want to add as new records
-    const newQuestionsData = orderedQuestions.map((question, index) => ({
-      ...question,
-      order: index + 1, // Adding order property based on the index
+    // Prepare data for updating order
+    const updatedQuestionsData = currentQuestions.map((question, index) => ({
+      id: question.id,
+      order: (currentPage - 1) * questionsPerPage + index + 1,
     }));
 
-    fetch("http://3.143.231.155:3006/questions/addQuestions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ questions: newQuestionsData }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server (data) if needed
-        console.log("New questions added successfully", data);
+    // Make a POST request to update the order of questions
+    axios
+      .post("http://localhost:8080/questions/updateQuestions", {
+        questions: updatedQuestionsData,
+      })
+      .then((response) => {
+        // Handle successful response
+        console.log("Questions order updated successfully:", response.data);
       })
       .catch((error) => {
-        console.error("Error adding new questions:", error.message);
+        // Handle error
+        console.error("Error updating questions order:", error);
       });
   };
-
   const handleChangePage = (event, newPage) => {
     setCurrentPage(newPage);
   };
@@ -142,7 +139,7 @@ function QuestionForm() {
     }));
 
     axios
-      .delete(`http://3.143.231.155:3006/questions/deleteQuestion`, {
+      .delete(`http://localhost:8080/questions/deleteQuestion`, {
         data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {

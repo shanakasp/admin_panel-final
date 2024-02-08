@@ -58,7 +58,7 @@ function PreviewCategory() {
   };
 
   useEffect(() => {
-    fetch("http://3.143.231.155:3006/category/getAllCategories")
+    fetch("http://localhost:8080/category/getAllCategories")
       .then((response) => response.json())
       .then((data) => setCategories(data.result.data))
       .catch((error) => console.error("Error fetching data:", error));
@@ -140,7 +140,7 @@ function PreviewCategory() {
 
       // Save category name and/or image URL in the database
       await fetch(
-        `http://3.143.231.155:3006/category/updateCategoryByID/${editCategoryId}`,
+        `http://localhost:8080/category/updateCategoryByID/${editCategoryId}`,
         {
           method: "PUT",
           headers: {
@@ -152,7 +152,7 @@ function PreviewCategory() {
 
       // Fetch updated data from the server
       const response = await fetch(
-        "http://3.143.231.155:3006/category/getAllCategories"
+        "http://localhost:8080/category/getAllCategories"
       );
       const data = await response.json();
       setCategories(data.result.data);
@@ -220,15 +220,13 @@ function PreviewCategory() {
     setTimeout(async () => {
       try {
         await fetch(
-          `http://3.143.231.155:3006/category/deleteCategoryByID/${deleteCategoryId}`,
+          `http://8080/category/deleteCategoryByID/${deleteCategoryId}`,
           {
             method: "DELETE",
           }
         );
 
-        const response = await fetch(
-          "http://3.143.231.155:3006/category/getAllCategories"
-        );
+        const response = await fetch("http://8080/category/getAllCategories");
         const data = await response.json();
         setCategories(data.result.data);
 
