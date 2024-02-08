@@ -81,26 +81,36 @@ function QuestionForm() {
     if (index > 0) {
       setOrderedQuestions((prevOrderedQuestions) => {
         const updatedQuestions = [...prevOrderedQuestions];
+        const movedQuestion = updatedQuestions[index];
         const temp = updatedQuestions[index];
         updatedQuestions[index] = updatedQuestions[index - 1];
         updatedQuestions[index - 1] = temp;
 
-        // Update order values dynamically
-        updatedQuestions[index].order += 1;
-        updatedQuestions[index - 1].order -= 1;
+        // Swap order values dynamically
+        const tempOrder = movedQuestion.order;
+        movedQuestion.order = updatedQuestions[index].order;
+        updatedQuestions[index].order = tempOrder;
 
-        // Compile the API call
-        axios
-          .put("http://localhost:8080/questions/updateQuestion", {
-            questionId: updatedQuestions[index].id,
-            order: updatedQuestions[index].order,
-          })
-          .then((response) => {
-            console.log("Order updated successfully", response.data);
-          })
-          .catch((error) => {
-            console.error("Error updating order:", error);
-          });
+        // Update order numbers for preceding questions
+        for (let i = index - 1; i >= 0; i--) {
+          updatedQuestions[i].order = updatedQuestions[i + 1].order - 1;
+        }
+
+        // Log and send updated order values
+        updatedQuestions.forEach(({ id, order }) => {
+          console.log(`Question ID: ${id}, New order: ${order}`);
+          axios
+            .put("http://localhost:8080/questions/updateQuestion", {
+              questionId: id,
+              order: order,
+            })
+            .then((response) => {
+              console.log("Order updated successfully", response.data);
+            })
+            .catch((error) => {
+              console.error("Error updating order:", error);
+            });
+        });
 
         return updatedQuestions;
       });
@@ -111,52 +121,44 @@ function QuestionForm() {
     if (index < orderedQuestions.length - 1) {
       setOrderedQuestions((prevOrderedQuestions) => {
         const updatedQuestions = [...prevOrderedQuestions];
+        const movedQuestion = updatedQuestions[index];
         const temp = updatedQuestions[index];
         updatedQuestions[index] = updatedQuestions[index + 1];
         updatedQuestions[index + 1] = temp;
 
-        // Update order values dynamically
-        updatedQuestions[index].order -= 1;
-        updatedQuestions[index + 1].order += 1;
+        // Swap order values dynamically
+        const tempOrder = movedQuestion.order;
+        movedQuestion.order = updatedQuestions[index].order;
+        updatedQuestions[index].order = tempOrder;
 
-        // Compile the API call
-        axios
-          .put("http://localhost:8080/questions/updateQuestion", {
-            questionId: updatedQuestions[index].id,
-            order: updatedQuestions[index].order,
-          })
-          .then((response) => {
-            console.log("Order updated successfully", response.data);
-          })
-          .catch((error) => {
-            console.error("Error updating order:", error);
-          });
+        // Update order numbers for subsequent questions
+        for (let i = index + 1; i < updatedQuestions.length; i++) {
+          updatedQuestions[i].order = updatedQuestions[i - 1].order + 1;
+        }
+
+        // Log and send updated order values
+        updatedQuestions.forEach(({ id, order }) => {
+          console.log(`Question ID: ${id}, New order: ${order}`);
+          axios
+            .put("http://localhost:8080/questions/updateQuestion", {
+              questionId: id,
+              order: order,
+            })
+            .then((response) => {
+              console.log("Order updated successfully", response.data);
+            })
+            .catch((error) => {
+              console.error("Error updating order:", error);
+            });
+        });
 
         return updatedQuestions;
       });
     }
   };
+
   const handleUpdateOrder = () => {
-    // Extracting question IDs and their updated orders from the table
-    const updatedOrdersData = orderedQuestions.map((question, index) => ({
-      questionId: question.id,
-      order: (currentPage - 1) * questionsPerPage + index + 1,
-    }));
-
-    // Log the updated order values
-    updatedOrdersData.forEach(({ questionId, order }) => {
-      console.log(`Question ID: ${questionId}, New order: ${order}`);
-    });
-
-    axios
-      .put("http://localhost:8080/questions/updateQuestion", updatedOrdersData)
-      .then((response) => {
-        // Handle the response from the server if needed
-        console.log("Questions order updated successfully", response.data);
-      })
-      .catch((error) => {
-        console.error("Error updating questions order:", error);
-      });
+    console.log("Handle Update Order");
   };
 
   const handleChangePage = (event, newPage) => {
