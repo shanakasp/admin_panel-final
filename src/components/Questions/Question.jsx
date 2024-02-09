@@ -447,7 +447,7 @@ function QuestionForm() {
                 color={updateOrderMode ? "warning" : "primary"} // Color changes based on mode
                 onClick={handleButtonClick}
               >
-                {updateOrderMode ? "Update Order" : "Done"}
+                {updateOrderMode ? "Update Order" : "Save Order"}
               </Button>
             </td>
             <Pagination
