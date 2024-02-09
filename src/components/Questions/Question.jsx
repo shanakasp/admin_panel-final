@@ -53,9 +53,10 @@ function QuestionForm() {
   };
   const handleDone = () => {
     setQuestionsPerPage(10);
-    // Your logic for handling "Done" goes here
+    setShowChangeOrderColumn(false); // Hide the Change Order column
     console.log("Handle Done");
   };
+
   const handleUpdateOrder = () => {
     // Your existing logic for handling update order goes here
     console.log("Handle Update Order");
@@ -292,22 +293,34 @@ function QuestionForm() {
                 </MuiAlert>
               </Snackbar>
             </div>
-            <MDBTable style={{}}>
-              <MDBTableHead style={{ alignSelf: "center", width: "700px" }}>
+            <MDBTable style={{ width: "100%" }}>
+              <MDBTableHead style={{ alignSelf: "center" }}>
                 <tr style={{ color: "#041083" }}>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Title
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Input Type
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Answer(s)
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th
+                    scope="col"
+                    style={{
+                      marginLeft: "5px",
+                      display: showChangeOrderColumn ? "none" : "table-cell",
+                    }}
+                  >
                     Actions
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "5%" }}>
+                  <th
+                    scope="col"
+                    style={{
+                      width: "5%",
+                      display: showChangeOrderColumn ? "table-cell" : "none",
+                    }}
+                  >
                     Change Order
                   </th>
                 </tr>
@@ -325,7 +338,7 @@ function QuestionForm() {
                             color: "#000000",
                             cursor: "pointer",
                             fontSize: "15px",
-                            maxWidth: "12ch",
+                            maxWidth: "8ch",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -347,7 +360,7 @@ function QuestionForm() {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            maxWidth: "10ch",
+                            maxWidth: "6ch",
                           }}
                         >
                           {question.type.charAt(0).toUpperCase() +
@@ -364,7 +377,7 @@ function QuestionForm() {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            maxWidth: "10ch",
+                            maxWidth: "7ch",
                           }}
                         >
                           {question.values
@@ -374,49 +387,60 @@ function QuestionForm() {
                       </td>
                       <td
                         style={{
-                          display: "flex",
-                          gap: "5px",
+                          display: showChangeOrderColumn
+                            ? "none"
+                            : "table-cell",
                         }}
                       >
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => handleSeeDetails(question)}
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          size="large"
-                          onClick={() => handleDelete(question.id)}
-                          disabled={loadingMap[question.id]}
-                        >
-                          {loadingMap[question.id] ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : (
-                            <DeleteIcon />
-                          )}
-                        </IconButton>
+                        <div style={{ display: "flex", gap: "5px" }}>
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleSeeDetails(question)}
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleDelete(question.id)}
+                            disabled={loadingMap[question.id]}
+                          >
+                            {loadingMap[question.id] ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        </div>
                       </td>
-                      <td>
-                        <td style={{ display: "flex" }}>
+
+                      <td
+                        style={{
+                          display: showChangeOrderColumn
+                            ? "table-cell"
+                            : "none",
+                        }}
+                      >
+                        <div style={{ display: "flex" }}>
                           <Button onClick={() => handleOrderUp(index)}>
                             <ArrowUpward />
                           </Button>
                           <Button onClick={() => handleOrderDown(index)}>
                             <ArrowDownward />
                           </Button>
-                        </td>
+                        </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4">No questions found.</td>
+                    <td colSpan="5">No questions found.</td>
                   </tr>
                 )}
               </MDBTableBody>
             </MDBTable>
+
             <td colSpan="5" style={{ textAlign: "right" }}>
               <Button
                 variant="contained"
