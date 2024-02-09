@@ -98,7 +98,7 @@ function Profile() {
       newPassword,
     };
 
-    fetch("http://3.143.231.155:3006/admin/changeSuperAdminPassword/1", {
+    fetch("http://localhost:8080/admin/changeSuperAdminPassword/1", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

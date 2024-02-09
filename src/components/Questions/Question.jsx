@@ -26,7 +26,6 @@ import { useParams } from "react-router-dom";
 function QuestionForm() {
   const [allQuestions, setAllQuestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [questionsPerPage] = useState(10);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [loadingMap, setLoadingMap] = useState({});
   const [notification, setNotification] = useState({
@@ -39,10 +38,37 @@ function QuestionForm() {
   const getParam = useParams();
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [orderedQuestions, setOrderedQuestions] = useState([]);
+  const [questionsPerPage, setQuestionsPerPage] = useState(10);
+  const [updateOrderMode, setUpdateOrderMode] = useState(true); // State to track the mode of the button
+  const [showChangeOrderColumn, setShowChangeOrderColumn] = useState(false);
+
+  const handleButtonClick = () => {
+    if (!updateOrderMode) {
+      handleDone();
+    } else {
+      handleUpdateOrder();
+    }
+    // Toggle the mode after each click
+    setUpdateOrderMode(!updateOrderMode);
+  };
+  const handleDone = () => {
+    setQuestionsPerPage(10);
+    setShowChangeOrderColumn(false); // Hide the Change Order column
+    console.log("Handle Done");
+  };
+
+  const handleUpdateOrder = () => {
+    // Your existing logic for handling update order goes here
+    console.log("Handle Update Order");
+    setShowChangeOrderColumn(true);
+    setCurrentPage(1);
+    // Change questionsPerPage to 1000
+    setQuestionsPerPage(100000);
+  };
 
   useEffect(() => {
     axios
-      .get("http://3.143.231.155:3006/questions/getAllQuestions")
+      .get("http://localhost:8080/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           const allQuestions = response.data.result.questions;
@@ -57,6 +83,12 @@ function QuestionForm() {
               (question) => question.category_id == getParam.id
             )
           );
+
+          // Log IDs and orders of the questions
+          console.log("Questions IDs with their order:");
+          allQuestions.forEach((question) => {
+            console.log(`ID: ${question.id}, Order: ${question.order}`);
+          });
         } else {
           console.error("Invalid response format from server.");
         }
@@ -75,9 +107,37 @@ function QuestionForm() {
     if (index > 0) {
       setOrderedQuestions((prevOrderedQuestions) => {
         const updatedQuestions = [...prevOrderedQuestions];
+        const movedQuestion = updatedQuestions[index];
         const temp = updatedQuestions[index];
         updatedQuestions[index] = updatedQuestions[index - 1];
         updatedQuestions[index - 1] = temp;
+
+        // Swap order values dynamically
+        const tempOrder = movedQuestion.order;
+        movedQuestion.order = updatedQuestions[index].order;
+        updatedQuestions[index].order = tempOrder;
+
+        // Update order numbers for preceding questions
+        for (let i = index - 1; i >= 0; i--) {
+          updatedQuestions[i].order = updatedQuestions[i + 1].order - 1;
+        }
+
+        // Log and send updated order values
+        updatedQuestions.forEach(({ id, order }) => {
+          console.log(`Question ID: ${id}, New order: ${order}`);
+          axios
+            .put("http://localhost:8080/questions/updateQuestion", {
+              questionId: id,
+              order: order,
+            })
+            .then((response) => {
+              console.log("Order updated successfully", response.data);
+            })
+            .catch((error) => {
+              console.error("Error updating order:", error);
+            });
+        });
+
         return updatedQuestions;
       });
     }
@@ -87,35 +147,40 @@ function QuestionForm() {
     if (index < orderedQuestions.length - 1) {
       setOrderedQuestions((prevOrderedQuestions) => {
         const updatedQuestions = [...prevOrderedQuestions];
+        const movedQuestion = updatedQuestions[index];
         const temp = updatedQuestions[index];
         updatedQuestions[index] = updatedQuestions[index + 1];
         updatedQuestions[index + 1] = temp;
+
+        // Swap order values dynamically
+        const tempOrder = movedQuestion.order;
+        movedQuestion.order = updatedQuestions[index].order;
+        updatedQuestions[index].order = tempOrder;
+
+        // Update order numbers for subsequent questions
+        for (let i = index + 1; i < updatedQuestions.length; i++) {
+          updatedQuestions[i].order = updatedQuestions[i - 1].order + 1;
+        }
+
+        // Log and send updated order values
+        updatedQuestions.forEach(({ id, order }) => {
+          console.log(`Question ID: ${id}, New order: ${order}`);
+          axios
+            .put("http://localhost:8080/questions/updateQuestion", {
+              questionId: id,
+              order: order,
+            })
+            .then((response) => {
+              console.log("Order updated successfully", response.data);
+            })
+            .catch((error) => {
+              console.error("Error updating order:", error);
+            });
+        });
+
         return updatedQuestions;
       });
     }
-  };
-  const handleUpdateOrder = () => {
-    // Assuming `orderedQuestions` contains the correct order you want to add as new records
-    const newQuestionsData = orderedQuestions.map((question, index) => ({
-      ...question,
-      order: index + 1, // Adding order property based on the index
-    }));
-
-    fetch("http://3.143.231.155:3006/questions/addQuestions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ questions: newQuestionsData }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the server (data) if needed
-        console.log("New questions added successfully", data);
-      })
-      .catch((error) => {
-        console.error("Error adding new questions:", error.message);
-      });
   };
 
   const handleChangePage = (event, newPage) => {
@@ -142,7 +207,7 @@ function QuestionForm() {
     }));
 
     axios
-      .delete(`http://3.143.231.155:3006/questions/deleteQuestion`, {
+      .delete(`http://localhost:8080/questions/deleteQuestion`, {
         data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {
@@ -228,22 +293,34 @@ function QuestionForm() {
                 </MuiAlert>
               </Snackbar>
             </div>
-            <MDBTable style={{}}>
-              <MDBTableHead style={{ alignSelf: "center", width: "700px" }}>
+            <MDBTable style={{ width: "100%" }}>
+              <MDBTableHead style={{ alignSelf: "center" }}>
                 <tr style={{ color: "#041083" }}>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Title
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Input Type
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th scope="col" style={{ width: "30%" }}>
                     Answer(s)
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "30%" }}>
+                  <th
+                    scope="col"
+                    style={{
+                      marginLeft: "5px",
+                      display: showChangeOrderColumn ? "none" : "table-cell",
+                    }}
+                  >
                     Actions
                   </th>
-                  <th scope="col" style={{ color: "#041083", width: "5%" }}>
+                  <th
+                    scope="col"
+                    style={{
+                      width: "5%",
+                      display: showChangeOrderColumn ? "table-cell" : "none",
+                    }}
+                  >
                     Change Order
                   </th>
                 </tr>
@@ -261,7 +338,7 @@ function QuestionForm() {
                             color: "#000000",
                             cursor: "pointer",
                             fontSize: "15px",
-                            maxWidth: "12ch",
+                            maxWidth: "8ch",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -283,7 +360,7 @@ function QuestionForm() {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            maxWidth: "10ch",
+                            maxWidth: "6ch",
                           }}
                         >
                           {question.type.charAt(0).toUpperCase() +
@@ -300,7 +377,7 @@ function QuestionForm() {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            maxWidth: "10ch",
+                            maxWidth: "7ch",
                           }}
                         >
                           {question.values
@@ -310,56 +387,67 @@ function QuestionForm() {
                       </td>
                       <td
                         style={{
-                          display: "flex",
-                          gap: "5px",
+                          display: showChangeOrderColumn
+                            ? "none"
+                            : "table-cell",
                         }}
                       >
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => handleSeeDetails(question)}
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          size="large"
-                          onClick={() => handleDelete(question.id)}
-                          disabled={loadingMap[question.id]}
-                        >
-                          {loadingMap[question.id] ? (
-                            <CircularProgress size={20} color="inherit" />
-                          ) : (
-                            <DeleteIcon />
-                          )}
-                        </IconButton>
+                        <div style={{ display: "flex", gap: "5px" }}>
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleSeeDetails(question)}
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleDelete(question.id)}
+                            disabled={loadingMap[question.id]}
+                          >
+                            {loadingMap[question.id] ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        </div>
                       </td>
-                      <td>
-                        <td style={{ display: "flex" }}>
+
+                      <td
+                        style={{
+                          display: showChangeOrderColumn
+                            ? "table-cell"
+                            : "none",
+                        }}
+                      >
+                        <div style={{ display: "flex" }}>
                           <Button onClick={() => handleOrderUp(index)}>
                             <ArrowUpward />
                           </Button>
                           <Button onClick={() => handleOrderDown(index)}>
                             <ArrowDownward />
                           </Button>
-                        </td>
+                        </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4">No questions found.</td>
+                    <td colSpan="5">No questions found.</td>
                   </tr>
                 )}
               </MDBTableBody>
             </MDBTable>
+
             <td colSpan="5" style={{ textAlign: "right" }}>
               <Button
                 variant="contained"
-                color="warning" // Use the appropriate color for warning
-                onClick={handleUpdateOrder}
+                color={updateOrderMode ? "warning" : "primary"} // Color changes based on mode
+                onClick={handleButtonClick}
               >
-                Update Order
+                {updateOrderMode ? "Update Order" : "Done"}
               </Button>
             </td>
             <Pagination

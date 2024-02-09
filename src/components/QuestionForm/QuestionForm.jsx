@@ -175,7 +175,7 @@ function QuestionForm() {
       return;
     }
 
-    fetch("http://3.143.231.155:3006/questions/addQuestion", {
+    fetch("http://localhost:8080/questions/addQuestion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
