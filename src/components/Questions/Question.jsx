@@ -302,13 +302,13 @@ function QuestionForm() {
                   <th scope="col" style={{ width: "30%" }}>
                     Input Type
                   </th>
-                  <th scope="col" style={{ width: "30%" }}>
+                  <th scope="col" style={{ width: "40%" }}>
                     Answer(s)
                   </th>
                   <th
                     scope="col"
                     style={{
-                      marginLeft: "5px",
+                      marginLeft: "15px",
                       display: showChangeOrderColumn ? "none" : "table-cell",
                     }}
                   >
