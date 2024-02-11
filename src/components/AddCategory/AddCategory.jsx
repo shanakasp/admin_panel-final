@@ -50,7 +50,7 @@ const AddCategory = () => {
       const snapshot = await uploadBytes(imageRef, imageUpload);
       const imageUrl = await getDownloadURL(snapshot.ref);
 
-      const apiUrl = "http://localhost:8080/category/placeCategory";
+      const apiUrl = "http://3.21.185.105:3006/category/placeCategory";
       const requestData = {
         category_name: categoryName,
         image_url: imageUrl,

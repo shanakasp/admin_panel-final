@@ -14,7 +14,7 @@ const Form = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/category/getCategoryByID/${id}`
+          `http://3.21.185.105:3006/category/getCategoryByID/${id}`
         );
 
         if (!response.ok) {

@@ -28,7 +28,7 @@ const Login = () => {
       setLoading(true); // Set loading state to true during login
 
       const response = await axios.post(
-        "http://localhost:8080/admin/login",
+        "http://3.21.185.105:3006/admin/login",
         values
       );
 

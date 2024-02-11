@@ -68,7 +68,7 @@ function QuestionForm() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/questions/getAllQuestions")
+      .get("http://3.21.185.105:3006/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           const allQuestions = response.data.result.questions;
@@ -126,7 +126,7 @@ function QuestionForm() {
         updatedQuestions.forEach(({ id, order }) => {
           console.log(`Question ID: ${id}, New order: ${order}`);
           axios
-            .put("http://localhost:8080/questions/updateQuestion", {
+            .put("http://3.21.185.105:3006/questions/updateQuestion", {
               questionId: id,
               order: order,
             })
@@ -166,7 +166,7 @@ function QuestionForm() {
         updatedQuestions.forEach(({ id, order }) => {
           console.log(`Question ID: ${id}, New order: ${order}`);
           axios
-            .put("http://localhost:8080/questions/updateQuestion", {
+            .put("http://3.21.185.105:3006/questions/updateQuestion", {
               questionId: id,
               order: order,
             })
@@ -207,33 +207,36 @@ function QuestionForm() {
     }));
 
     axios
-      .delete(`http://localhost:8080/questions/deleteQuestion`, {
+      .delete(`http://3.21.185.105:3006/questions/deleteQuestion`, {
         data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {
         console.log("Deleted successfully:", response.data);
 
+        const updatedQuestions = allQuestions.filter(
+          (question) => question.id !== questionIdToDelete
+        );
+        setAllQuestions(updatedQuestions);
+
+        if (selectedQuestion && selectedQuestion.id === questionIdToDelete) {
+          setSelectedQuestion(null);
+        }
+
+        setNotification({
+          open: true,
+          message: "Deleted successfully",
+          severity: "success",
+        });
+
+        setLoadingMap((prevLoadingMap) => ({
+          ...prevLoadingMap,
+          [questionIdToDelete]: false,
+        }));
+
+        // Reload the page after a short delay
         setTimeout(() => {
-          const updatedQuestions = allQuestions.filter(
-            (question) => question.id !== questionIdToDelete
-          );
-          setAllQuestions(updatedQuestions);
-
-          if (selectedQuestion && selectedQuestion.id === questionIdToDelete) {
-            setSelectedQuestion(null);
-          }
-
-          setNotification({
-            open: true,
-            message: "Deleted successfully",
-            severity: "success",
-          });
-
-          setLoadingMap((prevLoadingMap) => ({
-            ...prevLoadingMap,
-            [questionIdToDelete]: false,
-          }));
-        }, 500);
+          window.location.reload();
+        }, 800);
       })
       .catch((error) => {
         console.error("Error deleting:", error);
@@ -275,7 +278,7 @@ function QuestionForm() {
             <div className="notification">
               <Snackbar
                 open={notification.open}
-                autoHideDuration={3000}
+                autoHideDuration={1200}
                 onClose={() =>
                   setNotification({ ...notification, open: false })
                 }
