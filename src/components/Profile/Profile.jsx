@@ -4,14 +4,35 @@ import {
   Button,
   CircularProgress,
   Container,
+  IconButton,
   TextField,
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../Header/Header";
+import Header from "../Header/Header"; // Assuming Header is a component you've defined elsewhere
+
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function Profile() {
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const toggleOldPasswordVisibility = () => {
+    setShowOldPassword((prevShowOldPassword) => !prevShowOldPassword);
+  };
+
+  const toggleNewPasswordVisibility = () => {
+    setShowNewPassword((prevShowNewPassword) => !prevShowNewPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(
+      (prevShowConfirmPassword) => !prevShowConfirmPassword
+    );
+  };
+
   const navigate = useNavigate();
 
   const [userName, setUserName] = useState("");
@@ -35,16 +56,6 @@ function Profile() {
   };
 
   const handleChangePassword = () => {
-    // Validate new password strength
-    if (!isStrongPassword(newPassword)) {
-      setErrorMessages({
-        newPassword:
-          "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol.",
-        confirmPassword: "",
-      });
-      return;
-    }
-
     // Clear previous error messages
     setErrorMessages({
       oldPassword: "",
@@ -53,18 +64,30 @@ function Profile() {
     });
 
     // Validate inputs
-    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      setErrorMessages((prevErrors) => ({
-        oldPassword: !oldPassword.trim()
-          ? "Old password is required"
-          : prevErrors.oldPassword,
-        newPassword: !newPassword.trim()
-          ? "New password is required"
-          : prevErrors.newPassword,
-        confirmPassword: !confirmPassword.trim()
-          ? "Confirm password is required"
-          : prevErrors.confirmPassword,
-      }));
+    const errors = {};
+
+    if (!oldPassword.trim()) {
+      errors.oldPassword = "Old password is required";
+    }
+
+    if (!newPassword.trim()) {
+      errors.newPassword = "New password is required";
+    } else if (!isStrongPassword(newPassword)) {
+      errors.newPassword =
+        "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one symbol.";
+    }
+
+    if (!confirmPassword.trim()) {
+      errors.confirmPassword = "Confirm password is required";
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword =
+        "Confirm passwords do not match with New Password";
+    }
+
+    setErrorMessages(errors);
+
+    // If there are any errors, stop further processing
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -76,15 +99,6 @@ function Profile() {
         oldPassword: "Entered old password is incorrect",
         newPassword: "",
         confirmPassword: "",
-      });
-      return;
-    }
-
-    // Check if the new password and confirm password values are equal
-    if (newPassword !== confirmPassword) {
-      setErrorMessages({
-        // newPassword: "New passwords do not match with Confirm Password",
-        confirmPassword: "Confirm passwords do not match with New Password",
       });
       return;
     }
@@ -135,16 +149,6 @@ function Profile() {
       });
   };
 
-  const displayErrorMessages = () => {
-    setErrorMessages((prevErrors) => ({
-      oldPassword: !oldPassword.trim() ? prevErrors.oldPassword : "",
-      newPassword: !newPassword.trim() ? prevErrors.newPassword : "",
-      confirmPassword: !confirmPassword.trim()
-        ? prevErrors.confirmPassword
-        : "",
-    }));
-  };
-
   return (
     <div>
       <Header />
@@ -163,42 +167,78 @@ function Profile() {
             <Typography variant="h5">Change Password</Typography>
             <TextField
               label="Old Password"
-              type="password"
+              type={showOldPassword ? "text" : "password"}
               value={oldPassword}
               onChange={(e) => {
                 setOldPassword(e.target.value);
-                displayErrorMessages();
+                setErrorMessages((prevErrors) => ({
+                  ...prevErrors,
+                  oldPassword: "",
+                }));
               }}
               fullWidth
               margin="normal"
               error={Boolean(errorMessages.oldPassword)}
               helperText={errorMessages.oldPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={toggleOldPasswordVisibility} edge="end">
+                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+              sx={{ width: "100%" }}
             />
             <TextField
               label="New Password"
-              type="password"
+              type={showNewPassword ? "text" : "password"}
               value={newPassword}
               onChange={(e) => {
                 setNewPassword(e.target.value);
-                displayErrorMessages();
+                setErrorMessages((prevErrors) => ({
+                  ...prevErrors,
+                  newPassword: "",
+                }));
               }}
               fullWidth
               margin="normal"
               error={Boolean(errorMessages.newPassword)}
               helperText={errorMessages.newPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={toggleNewPasswordVisibility} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+              sx={{ width: "100%" }}
             />
             <TextField
               label="Confirm Password"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
-                displayErrorMessages();
+                setErrorMessages((prevErrors) => ({
+                  ...prevErrors,
+                  confirmPassword: "",
+                }));
               }}
               fullWidth
               margin="normal"
               error={Boolean(errorMessages.confirmPassword)}
               helperText={errorMessages.confirmPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton
+                    onClick={toggleConfirmPasswordVisibility}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+              sx={{ width: "100%" }}
             />
             <Button
               variant="contained"
@@ -215,7 +255,6 @@ function Profile() {
                 "Change Password"
               )}
             </Button>
-
             {message && (
               <Alert severity="success" sx={{ marginTop: 2 }}>
                 {message}
