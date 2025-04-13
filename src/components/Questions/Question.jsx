@@ -68,7 +68,7 @@ function QuestionForm() {
 
   useEffect(() => {
     axios
-      .get("http://3.21.185.105:3006/questions/getAllQuestions")
+      .get("http://localhost:8080/questions/getAllQuestions")
       .then((response) => {
         if (Array.isArray(response.data.result.questions)) {
           const allQuestions = response.data.result.questions;
@@ -126,7 +126,7 @@ function QuestionForm() {
         updatedQuestions.forEach(({ id, order }) => {
           console.log(`Question ID: ${id}, New order: ${order}`);
           axios
-            .put("http://3.21.185.105:3006/questions/updateQuestion", {
+            .put("http://localhost:8080/questions/updateQuestion", {
               questionId: id,
               order: order,
             })
@@ -166,7 +166,7 @@ function QuestionForm() {
         updatedQuestions.forEach(({ id, order }) => {
           console.log(`Question ID: ${id}, New order: ${order}`);
           axios
-            .put("http://3.21.185.105:3006/questions/updateQuestion", {
+            .put("http://localhost:8080/questions/updateQuestion", {
               questionId: id,
               order: order,
             })
@@ -207,7 +207,7 @@ function QuestionForm() {
     }));
 
     axios
-      .delete(`http://3.21.185.105:3006/questions/deleteQuestion`, {
+      .delete(`http://localhost:8080/questions/deleteQuestion`, {
         data: { questionId: [questionIdToDelete] },
       })
       .then((response) => {
